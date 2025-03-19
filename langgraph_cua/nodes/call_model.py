@@ -42,7 +42,7 @@ async def call_model(state: CUAState) -> Dict[str, Any]:
     Returns:
         The updated state with the model's response.
     """
-    last_message = state.messages[-1] if state.messages else None
+    last_message = state.get("messages", [])[-1] if state.get("messages", []) else None
     previous_response_id: Optional[str] = None
 
     if (
@@ -60,7 +60,7 @@ async def call_model(state: CUAState) -> Dict[str, Any]:
                 "type": "computer-preview",
                 "display_width": DEFAULT_DISPLAY_WIDTH,
                 "display_height": DEFAULT_DISPLAY_HEIGHT,
-                "environment": get_openai_env_from_state_env(state.environment),
+                "environment": get_openai_env_from_state_env(state.get("environment")),
             }
         ]
     )
@@ -73,11 +73,11 @@ async def call_model(state: CUAState) -> Dict[str, Any]:
     )
 
     response: AIMessageChunk
-    if state.computer_call_output:
+    if state.get("computer_call_output"):
         # TODO: How to pass back computer call outputs?
-        response = await model.ainvoke([state.computer_call_output])
+        response = await model.ainvoke([state.get("computer_call_output")])
     else:
-        response = await model.ainvoke(state.messages)
+        response = await model.ainvoke(state.get("messages", []))
 
     return {
         "messages": response,
