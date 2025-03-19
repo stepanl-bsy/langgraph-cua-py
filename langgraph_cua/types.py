@@ -1,9 +1,9 @@
 import os
-from enum import Enum
-from typing import Any, Dict, List, Literal, Optional, TypedDict
+from typing import Annotated, Any, Dict, List, Literal, Optional, TypedDict
 
+from langchain_core.messages import AnyMessage
 from langchain_core.runnables import RunnableConfig
-from langgraph.graph import MessagesState
+from langgraph.graph import add_messages
 
 
 class Output(TypedDict):
@@ -43,31 +43,22 @@ class ComputerCallOutput(TypedDict):
     ]  # Status of the message input
 
 
-class CUAEnvironment(str, Enum):
-    """Environment types for the computer use agent."""
-
-    WEB = "web"
-    UBUNTU = "ubuntu"
-    WINDOWS = "windows"
-
-
-class CUAState(MessagesState):
+class CUAState(TypedDict):
     """State schema for the computer use agent.
 
-    Inherits from MessagesState which provides the message list between the user & assistant.
-    This contains messages, including the computer use calls.
-
     Attributes:
+        messages: The messages between the user and assistant.
         instance_id: The ID of the instance to use for this thread.
         environment: The environment to use. Default is "web".
         computer_call_output: The output of the most recent computer call.
         stream_url: The URL to the live-stream of the virtual machine.
     """
 
-    instance_id: Optional[str] = None
-    environment: CUAEnvironment = CUAEnvironment.WEB
-    computer_call_output: Optional[ComputerCallOutput] = None
-    stream_url: Optional[str] = None
+    messages: Annotated[list[AnyMessage], add_messages] = []
+    instance_id: Annotated[Optional[str], None] = None
+    environment: Annotated[Literal["web", "ubuntu", "windows"], "web"] = "web"
+    computer_call_output: Annotated[Optional[ComputerCallOutput], None] = None
+    stream_url: Annotated[Optional[str], None] = None
 
 
 class CUAConfiguration(TypedDict):

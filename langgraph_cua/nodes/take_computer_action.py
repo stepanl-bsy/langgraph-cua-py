@@ -7,10 +7,10 @@ from openai.types.responses.response_computer_tool_call import ResponseComputerT
 from scrapybara.types import ComputerResponse, InstanceGetStreamUrlResponse
 
 from ..types import ComputerCallOutput, CUAState
-from ..utils import ainit_or_load, is_computer_tool_call
+from ..utils import init_or_load, is_computer_tool_call
 
 
-async def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
+def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
     """
     Executes computer actions based on the tool call in the last message.
 
@@ -32,83 +32,72 @@ async def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[
     # Cast tool_outputs as list[ResponseComputerToolCall] since is_computer_tool_call is true
     tool_outputs: list[ResponseComputerToolCall] = tool_outputs
 
-    instance = await ainit_or_load(state, config)
+    instance = init_or_load(state, config)
 
     stream_url: Optional[str] = state.get("stream_url")
     if not stream_url:
         # If the stream_url is not yet defined in state, fetch it, then write to the custom stream
         # so that it's made accessible to the client (or whatever is reading the stream) before any actions are taken.
-        stream_url_response: InstanceGetStreamUrlResponse = await instance.get_stream_url()
+        stream_url_response: InstanceGetStreamUrlResponse = instance.get_stream_url()
         stream_url = stream_url_response.stream_url
 
         writer = get_stream_writer()
         writer({"stream_url": stream_url})
 
-    action = tool_outputs[0].action
+    action = tool_outputs[0].get("action")
     computer_call_output: Optional[ComputerCallOutput] = None
 
     try:
         computer_response: Optional[ComputerResponse] = None
-        action_type = action.type
+        action_type = action.get("type")
 
         if action_type == "click":
-            computer_response = await instance.computer(
-                {
-                    "action": "click_mouse",
-                    "button": "middle" if action.button == "wheel" else action.button,
-                    "coordinates": [action.x, action.y],
-                }
+            computer_response = instance.computer(
+                action="click_mouse",
+                button="middle" if action.get("button") == "wheel" else action.get("button"),
+                coordinates=[action.get("x"), action.get("y")],
             )
         elif action_type == "double_click":
-            computer_response = await instance.computer(
-                {
-                    "action": "click_mouse",
-                    "button": "left",
-                    "coordinates": [action.x, action.y],
-                    "num_clicks": 2,
-                }
+            computer_response = instance.computer(
+                action="click_mouse",
+                button="left",
+                coordinates=[action.get("x"), action.get("y")],
+                num_clicks=2,
             )
         elif action_type == "drag":
-            computer_response = await instance.computer(
-                {"action": "drag_mouse", "path": [[point.x, point.y] for point in action.path]}
+            computer_response = instance.computer(
+                action="drag_mouse",
+                path=[[point.get("x"), point.get("y")] for point in action.get("path")],
             )
         elif action_type == "keypress":
-            computer_response = await instance.computer(
-                {"action": "press_key", "keys": action.keys}
-            )
+            computer_response = instance.computer(action="press_key", keys=action.get("keys"))
         elif action_type == "move":
-            computer_response = await instance.computer(
-                {"action": "move_mouse", "coordinates": [action.x, action.y]}
+            computer_response = instance.computer(
+                action="move_mouse", coordinates=[action.get("x"), action.get("y")]
             )
         elif action_type == "screenshot":
-            computer_response = await instance.computer({"action": "take_screenshot"})
+            computer_response = instance.computer(action="take_screenshot")
         elif action_type == "wait":
-            computer_response = await instance.computer(
-                {
-                    "action": "wait",
-                    # Default timeout of 2000ms (2 seconds)
-                    "duration": 2000,
-                }
+            computer_response = instance.computer(
+                action="wait",
+                # Default timeout of 2000ms (2 seconds)
+                duration=2000,
             )
         elif action_type == "scroll":
-            computer_response = await instance.computer(
-                {
-                    "action": "scroll",
-                    "delta_x": action.scroll_x,
-                    "delta_y": action.scroll_y,
-                    "coordinates": [action.x, action.y],
-                }
+            computer_response = instance.computer(
+                action="scroll",
+                delta_x=action.get("scroll_x"),
+                delta_y=action.get("scroll_y"),
+                coordinates=[action.get("x"), action.get("y")],
             )
         elif action_type == "type":
-            computer_response = await instance.computer(
-                {"action": "type_text", "text": action.text}
-            )
+            computer_response = instance.computer(action="type_text", text=action.get("text"))
         else:
             raise ValueError(f"Unknown computer action received: {action}")
 
         if computer_response:
             computer_call_output = {
-                "call_id": tool_outputs[0].call_id,
+                "call_id": tool_outputs[0].get("call_id"),
                 "type": "computer_call_output",
                 "output": {
                     "type": "computer_screenshot",
@@ -116,8 +105,8 @@ async def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[
                 },
             }
     except Exception as e:
-        print(f"Failed to execute computer call: {e}")
-        print(f"Computer call details: {tool_outputs[0]}")
+        print(f"\n\nFailed to execute computer call: {e}\n\n")
+        print(f"Computer call details: {tool_outputs[0]}\n\n")
 
     return {
         "computer_call_output": computer_call_output,

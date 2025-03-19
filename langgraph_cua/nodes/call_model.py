@@ -1,17 +1,17 @@
 from typing import Any, Dict, Optional
 
-from langchain_core.messages import AIMessageChunk
+from langchain_core.messages import AIMessageChunk, ToolMessage
 from langchain_openai import ChatOpenAI
 
-from ..types import CUAEnvironment, CUAState
+from ..types import CUAState
 
 
-def get_openai_env_from_state_env(env: CUAEnvironment) -> str:
+def get_openai_env_from_state_env(env: str) -> str:
     """
-    Converts CUAEnvironment to OpenAI environment string.
+    Converts one of "web", "ubuntu", or "windows" to OpenAI environment string.
 
     Args:
-        env: The CUAEnvironment to convert.
+        env: The environment to convert.
 
     Returns:
         The corresponding OpenAI environment string.
@@ -19,11 +19,11 @@ def get_openai_env_from_state_env(env: CUAEnvironment) -> str:
     Raises:
         ValueError: If the environment is invalid.
     """
-    if env == CUAEnvironment.WEB:
+    if env == "web":
         return "browser"
-    elif env == CUAEnvironment.UBUNTU:
+    elif env == "ubuntu":
         return "ubuntu"
-    elif env == CUAEnvironment.WINDOWS:
+    elif env == "windows":
         return "windows"
 
 
@@ -52,32 +52,29 @@ async def call_model(state: CUAState) -> Dict[str, Any]:
     ):
         previous_response_id = last_message.response_metadata["id"]
 
-    model = ChatOpenAI(model="computer-use-preview", use_responses_api=True)
-
-    model = model.bind_tools(
-        [
-            {
-                "type": "computer-preview",
-                "display_width": DEFAULT_DISPLAY_WIDTH,
-                "display_height": DEFAULT_DISPLAY_HEIGHT,
-                "environment": get_openai_env_from_state_env(state.get("environment")),
-            }
-        ]
+    llm = ChatOpenAI(
+        model="computer-use-preview",
+        model_kwargs={"truncation": "auto", "previous_response_id": previous_response_id},
     )
 
-    model = model.bind(
-        {
-            "truncation": "auto",
-            "previous_response_id": previous_response_id,
-        }
-    )
+    tool = {
+        "type": "computer_use_preview",
+        "display_width": DEFAULT_DISPLAY_WIDTH,
+        "display_height": DEFAULT_DISPLAY_HEIGHT,
+        "environment": get_openai_env_from_state_env(state.get("environment", "web")),
+    }
+    llm_with_tools = llm.bind_tools([tool])
 
     response: AIMessageChunk
     if state.get("computer_call_output"):
+        tool_msg = ToolMessage(
+            content=state.get("computer_call_output").get("output"),
+            tool_call_id=state.get("computer_call_output").get("call_id"),
+        )
         # TODO: How to pass back computer call outputs?
-        response = await model.ainvoke([state.get("computer_call_output")])
+        response = await llm_with_tools.ainvoke([tool_msg])
     else:
-        response = await model.ainvoke(state.get("messages", []))
+        response = await llm_with_tools.ainvoke(state.get("messages", []))
 
     return {
         "messages": response,
