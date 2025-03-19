@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from langchain_core.messages import AIMessageChunk, ToolMessage
+from langchain_core.messages import AIMessageChunk
 from langchain_openai import ChatOpenAI
 
 from ..types import CUAState
@@ -42,10 +42,21 @@ async def call_model(state: CUAState) -> Dict[str, Any]:
     Returns:
         The updated state with the model's response.
     """
-    last_message = state.get("messages", [])[-1] if state.get("messages", []) else None
+    messages = state.get("messages", [])
     previous_response_id: Optional[str] = None
+    last_message = messages[-1] if messages else None
 
-    if (
+    # Check if the last message is a tool message
+    if last_message and getattr(last_message, "type", None) == "tool":
+        # If it's a tool message, check if the second-to-last message is an AI message
+        if (
+            len(messages) >= 2
+            and getattr(messages[-2], "type", None) == "ai"
+            and hasattr(messages[-2], "response_metadata")
+        ):
+            previous_response_id = messages[-2].response_metadata["id"]
+    # Otherwise, check if the last message is an AI message
+    elif (
         last_message
         and getattr(last_message, "type", None) == "ai"
         and hasattr(last_message, "response_metadata")
@@ -66,18 +77,17 @@ async def call_model(state: CUAState) -> Dict[str, Any]:
     llm_with_tools = llm.bind_tools([tool])
 
     response: AIMessageChunk
-    if state.get("computer_call_output"):
-        if previous_response_id is None:
-            raise ValueError("Cannot process computer_call_output without a previous_response_id")
 
-        tool_msg = ToolMessage(
-            content=state.get("computer_call_output").get("output"),
-            tool_call_id=state.get("computer_call_output").get("call_id"),
-        )
-        # TODO: How to pass back computer call outputs?
-        response = await llm_with_tools.ainvoke([tool_msg])
+    # Check if the last message is a tool message
+    if last_message and getattr(last_message, "type", None) == "tool":
+        if previous_response_id is None:
+            raise ValueError("Cannot process tool message without a previous_response_id")
+
+        # Only pass the tool message to the model
+        response = await llm_with_tools.ainvoke([last_message])
     else:
-        response = await llm_with_tools.ainvoke(state.get("messages", []))
+        # Pass all messages to the model
+        response = await llm_with_tools.ainvoke(messages)
 
     return {
         "messages": response,

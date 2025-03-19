@@ -50,14 +50,12 @@ class CUAState(TypedDict):
         messages: The messages between the user and assistant.
         instance_id: The ID of the instance to use for this thread.
         environment: The environment to use. Default is "web".
-        computer_call_output: The output of the most recent computer call.
         stream_url: The URL to the live-stream of the virtual machine.
     """
 
     messages: Annotated[list[AnyMessage], add_messages] = []
     instance_id: Annotated[Optional[str], None] = None
     environment: Annotated[Literal["web", "ubuntu", "windows"], "web"] = "web"
-    computer_call_output: Annotated[Optional[ComputerCallOutput], None] = None
     stream_url: Annotated[Optional[str], None] = None
 
 

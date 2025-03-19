@@ -1,13 +1,13 @@
 import time
 from typing import Any, Dict, Optional
 
-from langchain_core.messages import AnyMessage
+from langchain_core.messages import AnyMessage, ToolMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.config import get_stream_writer
 from openai.types.responses.response_computer_tool_call import ResponseComputerToolCall
 from scrapybara.types import ComputerResponse, InstanceGetStreamUrlResponse
 
-from ..types import ComputerCallOutput, CUAState
+from ..types import CUAState
 from ..utils import init_or_load, is_computer_tool_call
 
 
@@ -44,9 +44,10 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
 
         writer = get_stream_writer()
         writer({"stream_url": stream_url})
+        print(f"\n\n\nStream URL: {stream_url}\n\n\n")
 
     action = tool_outputs[0].get("action")
-    computer_call_output: Optional[ComputerCallOutput] = None
+    tool_message: Optional[ToolMessage] = None
 
     try:
         computer_response: Optional[ComputerResponse] = None
@@ -96,21 +97,21 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
             raise ValueError(f"Unknown computer action received: {action}")
 
         if computer_response:
-            computer_call_output = {
-                "call_id": tool_outputs[0].get("call_id"),
-                "type": "computer_call_output",
-                "output": {
-                    # "type": "computer_screenshot",
-                    "type": "input_image",
-                    "image_url": f"data:image/png;base64,{computer_response.base_64_image}",
-                },
+            output_content = {
+                # "type": "computer_screenshot",
+                "type": "input_image",
+                "image_url": f"data:image/png;base64,{computer_response.base_64_image}",
             }
+            tool_message = ToolMessage(
+                content=output_content,
+                tool_call_id=tool_outputs[0].get("call_id"),
+            )
     except Exception as e:
         print(f"\n\nFailed to execute computer call: {e}\n\n")
         print(f"Computer call details: {tool_outputs[0]}\n\n")
 
     return {
-        "computer_call_output": computer_call_output,
+        "messages": tool_message if tool_message else None,
         "instance_id": instance.id,
         "stream_url": stream_url,
     }
