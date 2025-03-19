@@ -81,6 +81,8 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
         elif action_type == "wait":
             # Sleep for 2000ms (2 seconds)
             time.sleep(2)
+            # Take a screenshot after waiting
+            computer_response = instance.computer(action="take_screenshot")
         elif action_type == "scroll":
             computer_response = instance.computer(
                 action="scroll",
@@ -98,7 +100,8 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
                 "call_id": tool_outputs[0].get("call_id"),
                 "type": "computer_call_output",
                 "output": {
-                    "type": "computer_screenshot",
+                    # "type": "computer_screenshot",
+                    "type": "input_image",
                     "image_url": f"data:image/png;base64,{computer_response.base_64_image}",
                 },
             }
