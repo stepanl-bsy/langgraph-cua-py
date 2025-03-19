@@ -21,7 +21,7 @@ async def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[
     Returns:
         A dictionary with updated state information.
     """
-    message: AnyMessage = state.messages[-1]
+    message: AnyMessage = state.get("messages", [])[-1]
     assert message.type == "ai", "Last message must be an AI message"
     tool_outputs = message.additional_kwargs.get("tool_outputs")
 
@@ -34,7 +34,7 @@ async def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[
 
     instance = await ainit_or_load(state, config)
 
-    stream_url: Optional[str] = state.stream_url
+    stream_url: Optional[str] = state.get("stream_url")
     if not stream_url:
         # If the stream_url is not yet defined in state, fetch it, then write to the custom stream
         # so that it's made accessible to the client (or whatever is reading the stream) before any actions are taken.

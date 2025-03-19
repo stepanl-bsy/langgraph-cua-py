@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Literal, Optional, TypedDict
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import MessagesState
-from scrapybara import Scrapybara
 
 
 class Output(TypedDict):
@@ -60,14 +59,12 @@ class CUAState(MessagesState):
 
     Attributes:
         instance_id: The ID of the instance to use for this thread.
-        scrapybara_client: The Scrapybara client to use to access the virtual machine.
         environment: The environment to use. Default is "web".
         computer_call_output: The output of the most recent computer call.
         stream_url: The URL to the live-stream of the virtual machine.
     """
 
     instance_id: Optional[str] = None
-    scrapybara_client: Scrapybara
     environment: CUAEnvironment = CUAEnvironment.WEB
     computer_call_output: Optional[ComputerCallOutput] = None
     stream_url: Optional[str] = None
