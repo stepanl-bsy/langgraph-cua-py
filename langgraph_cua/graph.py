@@ -61,3 +61,9 @@ workflow.add_conditional_edges("take_computer_action", reinvoke_model_or_end)
 
 graph = workflow.compile()
 graph.name = "Computer Use Agent"
+
+# TODO: What else do I need to do to this to match the other create functions?
+def create_cua():
+    return graph
+
+__all__ = ["create_cua", graph]
