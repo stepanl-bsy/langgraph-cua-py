@@ -1,3 +1,4 @@
+import time
 from typing import Any, Dict, Optional
 
 from langchain_core.messages import AnyMessage
@@ -78,11 +79,8 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
         elif action_type == "screenshot":
             computer_response = instance.computer(action="take_screenshot")
         elif action_type == "wait":
-            computer_response = instance.computer(
-                action="wait",
-                # Default timeout of 2000ms (2 seconds)
-                duration=2000,
-            )
+            # Sleep for 2000ms (2 seconds)
+            time.sleep(2)
         elif action_type == "scroll":
             computer_response = instance.computer(
                 action="scroll",

@@ -67,6 +67,9 @@ async def call_model(state: CUAState) -> Dict[str, Any]:
 
     response: AIMessageChunk
     if state.get("computer_call_output"):
+        if previous_response_id is None:
+            raise ValueError("Cannot process computer_call_output without a previous_response_id")
+
         tool_msg = ToolMessage(
             content=state.get("computer_call_output").get("output"),
             tool_call_id=state.get("computer_call_output").get("call_id"),

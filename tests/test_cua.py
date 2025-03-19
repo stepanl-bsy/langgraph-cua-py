@@ -53,6 +53,6 @@ async def test_browser_interaction():
         elif "call_model" in update:
             print("Model Call:")
             if update.get("call_model", {}).get("messages"):
-                print(update["call_model"]["messages"])
+                print(update["call_model"]["messages"].additional_kwargs["tool_outputs"])
         else:
             print(update)
