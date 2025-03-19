@@ -4,7 +4,7 @@ from langchain_core.runnables import RunnableConfig
 from scrapybara import Scrapybara
 from scrapybara.client import BrowserInstance, UbuntuInstance, WindowsInstance
 
-from .types import CUAEnvironment, get_configuration_with_defaults
+from .types import get_configuration_with_defaults
 
 
 def get_scrapybara_client(api_key: str) -> Scrapybara:
@@ -26,7 +26,7 @@ def get_scrapybara_client(api_key: str) -> Scrapybara:
     return client
 
 
-async def ainit_or_load(
+def init_or_load(
     inputs: Dict[str, Any], config: RunnableConfig
 ) -> Union[UbuntuInstance, BrowserInstance, WindowsInstance]:
     """
@@ -41,7 +41,7 @@ async def ainit_or_load(
     """
 
     instance_id = inputs.get("instance_id")
-    environment = inputs.get("environment")
+    environment = inputs.get("environment", "web")
 
     configuration = get_configuration_with_defaults(config)
     scrapybara_api_key = configuration.get("scrapybara_api_key")
@@ -56,14 +56,14 @@ async def ainit_or_load(
     client = get_scrapybara_client(scrapybara_api_key)
 
     if instance_id:
-        return await client.get(instance_id)
+        return client.get(instance_id)
 
-    if environment == CUAEnvironment.UBUNTU:
-        return await client.start_ubuntu(timeout_hours=timeout_hours)
-    elif environment == CUAEnvironment.WINDOWS:
-        return await client.start_windows(timeout_hours=timeout_hours)
-    elif environment == CUAEnvironment.WEB:
-        return await client.start_browser(timeout_hours=timeout_hours)
+    if environment == "ubuntu":
+        return client.start_ubuntu(timeout_hours=timeout_hours)
+    elif environment == "windows":
+        return client.start_windows(timeout_hours=timeout_hours)
+    elif environment == "web":
+        return client.start_browser(timeout_hours=timeout_hours)
 
     raise ValueError(
         f"Invalid environment. Must be one of 'web', 'ubuntu', or 'windows'. Received: {environment}"

@@ -16,10 +16,10 @@ def take_action_or_end(state: CUAState):
     Returns:
         "take_computer_action" or END depending on if a computer call is present.
     """
-    if not state.messages:
+    if not state.get("messages", []):
         return END
 
-    last_message = state.messages[-1]
+    last_message = state.get("messages", [])[-1]
     additional_kwargs = getattr(last_message, "additional_kwargs", None)
 
     if not additional_kwargs:
@@ -44,7 +44,7 @@ def reinvoke_model_or_end(state: CUAState):
     Returns:
         "call_model" or END depending on if a computer call output is present.
     """
-    if state.computer_call_output:
+    if state.get("computer_call_output"):
         return "call_model"
 
     return END

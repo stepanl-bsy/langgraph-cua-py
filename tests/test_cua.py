@@ -37,44 +37,22 @@ async def test_browser_interaction():
 
     # Process the stream updates
     async for update in stream:
-        if isinstance(update, list):
-            if update[0] == "custom":
-                print("\n---CUSTOM---\n")
-                print(update[1])
-            else:
-                print("\n---UPDATE---\n")
-                if "call_model" in update[1]:
-                    messages = update[1]["call_model"].get("messages")
-                    if messages:
-                        print(
-                            {
-                                "additional_kwargs": getattr(messages, "additional_kwargs", None),
-                                "content": getattr(messages, "content", None),
-                            }
-                        )
-                elif "take_computer_action" in update[1]:
-                    computer_call_output = update[1]["take_computer_action"].get(
-                        "computer_call_output"
-                    )
-                    if computer_call_output:
-                        # Truncate image_url to avoid excessive output
-                        output = computer_call_output.get("output", {})
-                        image_url = output.get("image_url", "")
-                        truncated_output = {
-                            **output,
-                            "image_url": image_url[:100] if image_url else None,
-                        }
+        print("\n---UPDATE---\n")
 
-                        print(
-                            {
-                                "computer_call_output": {
-                                    **computer_call_output,
-                                    "output": truncated_output,
-                                }
-                            }
-                        )
-                else:
-                    print(update[1])
+        if "take_computer_action" in update:
+            print("Computer Action:")
+            if update.get("take_computer_action", {}).get("computer_call_output"):
+                output_dict = update["take_computer_action"]["computer_call_output"]
+                # Handle image_url specially - truncate to 100 chars
+                if output_dict.get("output", {}).get("image_url"):
+                    image_url = output_dict["output"]["image_url"]
+                    output_dict["output"]["image_url"] = (
+                        image_url[:100] + "..." if len(image_url) > 100 else image_url
+                    )
+                print(output_dict)
+        elif "call_model" in update:
+            print("Model Call:")
+            if update.get("call_model", {}).get("messages"):
+                print(update["call_model"]["messages"])
         else:
-            print("\n---UPDATE (not array)---\n")
             print(update)
