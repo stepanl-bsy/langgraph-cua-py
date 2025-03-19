@@ -35,16 +35,17 @@ def take_action_or_end(state: CUAState):
 
 def reinvoke_model_or_end(state: CUAState):
     """
-    Routes to the call_model node if a computer call output is present,
+    Routes to the call_model node if the last message is a tool message,
     otherwise routes to END.
 
     Args:
         state: The current state of the thread.
 
     Returns:
-        "call_model" or END depending on if a computer call output is present.
+        "call_model" or END depending on if the last message is a tool message.
     """
-    if state.get("computer_call_output"):
+    messages = state.get("messages", [])
+    if messages and getattr(messages[-1], "type", None) == "tool":
         return "call_model"
 
     return END
