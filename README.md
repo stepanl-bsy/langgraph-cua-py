@@ -1,5 +1,8 @@
 # 🤖 LangGraph Computer Use Agent (CUA)
 
+> [!DANGER]
+> **THIS REPO IS A WORK IN PROGRESS AND NOT INTENDED FOR USE YET**
+
 A Python library for creating computer use agent (CUA) systems using [LangGraph](https://github.com/langchain-ai/langgraph). A CUA is a type of agent which has the ability to interact with a computer to preform tasks.
 
 ## Features
@@ -31,3 +34,41 @@ TODO: Add how to add memory section
 ## How to customize
 
 TODO: Add how to customize section
+
+## Development
+
+To get started with development, first clone the repository:
+
+```bash
+git clone https://github.com/langchain-ai/langgraph-cua.git
+```
+
+Create a virtual environment:
+
+```bash
+uv venv
+```
+
+Activate it:
+
+```bash
+source .venv/bin/activate
+```
+
+Then, install dependencies:
+
+```bash
+uv sync --all-groups
+```
+
+Next, set the required environment variables:
+
+```bash
+cp .env.example .env
+```
+
+Finally, you can then run the tests:
+
+```bash
+pytest -xvs tests/test_cua.py
+```
