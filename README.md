@@ -1,6 +1,6 @@
 # 🤖 LangGraph Computer Use Agent (CUA)
 
-> [!DANGER]
+> [!WARNING]
 > **THIS REPO IS A WORK IN PROGRESS AND NOT INTENDED FOR USE YET**
 
 A Python library for creating computer use agent (CUA) systems using [LangGraph](https://github.com/langchain-ai/langgraph). A CUA is a type of agent which has the ability to interact with a computer to preform tasks.
