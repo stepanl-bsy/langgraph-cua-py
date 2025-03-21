@@ -10,6 +10,31 @@ from scrapybara.types import ComputerResponse, InstanceGetStreamUrlResponse
 from ..types import CUAState
 from ..utils import init_or_load, is_computer_tool_call
 
+# Copied from the OpenAI example repository
+# https://github.com/openai/openai-cua-sample-app/blob/eb2d58ba77ffd3206d3346d6357093647d29d99c/computers/scrapybara.py#L10
+CUA_KEY_TO_SCRAPYBARA_KEY = {
+    "/": "slash",
+    "\\": "backslash",
+    "arrowdown": "Down",
+    "arrowleft": "Left",
+    "arrowright": "Right",
+    "arrowup": "Up",
+    "backspace": "BackSpace",
+    "capslock": "Caps_Lock",
+    "cmd": "Meta_L",
+    "delete": "Delete",
+    "end": "End",
+    "enter": "Return",
+    "esc": "Escape",
+    "home": "Home",
+    "insert": "Insert",
+    "option": "Alt_L",
+    "pagedown": "Page_Down",
+    "pageup": "Page_Up",
+    "tab": "Tab",
+    "win": "Meta_L",
+}
+
 
 def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
     """
@@ -72,11 +97,11 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
                 path=[[point.get("x"), point.get("y")] for point in action.get("path")],
             )
         elif action_type == "keypress":
-            # Convert all keys to lowercase before passing them to the computer method
-            lowercase_keys = [key.lower() if isinstance(key, str) else key for key in action.get("keys", [])]
-            # computer_response = instance.computer(action="press_key", keys=lowercase_keys)
-            print("\n\nPRESSING ENTER\n\n")
-            computer_response = instance.computer(action="press_key", keys=["Return"])
+            mapped_keys = [
+                CUA_KEY_TO_SCRAPYBARA_KEY.get(key.lower(), key.lower())
+                for key in action.get("keys")
+            ]
+            computer_response = instance.computer(action="press_key", keys=mapped_keys)
         elif action_type == "move":
             computer_response = instance.computer(
                 action="move_mouse", coordinates=[action.get("x"), action.get("y")]
@@ -91,8 +116,8 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
         elif action_type == "scroll":
             computer_response = instance.computer(
                 action="scroll",
-                delta_x=action.get("scroll_x"),
-                delta_y=action.get("scroll_y"),
+                delta_x=action.get("scroll_x") // 20,
+                delta_y=action.get("scroll_y") // 20,
                 coordinates=[action.get("x"), action.get("y")],
             )
         elif action_type == "type":
