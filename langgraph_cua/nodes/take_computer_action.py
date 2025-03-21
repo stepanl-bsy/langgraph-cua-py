@@ -72,7 +72,11 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
                 path=[[point.get("x"), point.get("y")] for point in action.get("path")],
             )
         elif action_type == "keypress":
-            computer_response = instance.computer(action="press_key", keys=action.get("keys"))
+            # Convert all keys to lowercase before passing them to the computer method
+            lowercase_keys = [key.lower() if isinstance(key, str) else key for key in action.get("keys", [])]
+            # computer_response = instance.computer(action="press_key", keys=lowercase_keys)
+            print("\n\nPRESSING ENTER\n\n")
+            computer_response = instance.computer(action="press_key", keys=["Return"])
         elif action_type == "move":
             computer_response = instance.computer(
                 action="move_mouse", coordinates=[action.get("x"), action.get("y")]
