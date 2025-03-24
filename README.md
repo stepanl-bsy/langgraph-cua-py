@@ -43,7 +43,22 @@ cua_graph = create_cua()
 
 ## How to customize
 
-TODO: Add how to customize section
+The `create_cua` function accepts a few configuration parameters. These are the same configuration parameters that the graph accepts, along with `recursion_limit`.
+
+You can either pass these parameters when calling `create_cua`, or at runtime when invoking the graph by passing them to the `config` object.
+
+### Configuration Parameters
+
+- `scrapybara_api_key`: The API key to use for Scrapybara. If not provided, it defaults to reading the
+    `SCRAPYBARA_API_KEY` environment variable.
+- `timeout_hours`: The number of hours to keep the virtual machine running before it times out.
+- `zdr_enabled`: Whether or not Zero Data Retention is enabled in the user's OpenAI account. If True,
+    the agent will not pass the 'previous_response_id' to the model, and will always pass it the full
+    message history for each request. If False, the agent will pass the 'previous_response_id' to the
+    model, and only the latest message in the history will be passed. Default False.
+- `recursion_limit`: The maximum number of recursive calls the agent can make. Default is 100. This is
+    greater than the standard default of 25 in LangGraph, because computer use agents are expected to
+    take more iterations.
 
 ## Development
 
