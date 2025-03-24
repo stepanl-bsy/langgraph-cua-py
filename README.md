@@ -1,8 +1,5 @@
 # 🤖 LangGraph Computer Use Agent (CUA)
 
-> [!WARNING]
-> **THIS REPO IS A WORK IN PROGRESS AND NOT INTENDED FOR USE YET**
-
 A Python library for creating computer use agent (CUA) systems using [LangGraph](https://github.com/langchain-ai/langgraph). A CUA is a type of agent which has the ability to interact with a computer to preform tasks.
 
 ## Features
@@ -19,17 +16,20 @@ pip install langgraph-cua langgraph langchain-core langchain-openai
 
 ## Quickstart
 
+This project by default uses [Scrapybara](https://scrapybara.com/) for accessing a virtual machine to run the agent. To use LangGraph CUA, you'll need both OpenAI and Scrapybara API keys.
+
 ```bash
+export OPENAI_API_KEY=<your_api_key>
 export SCRAPYBARA_API_KEY=<your_api_key>
 ```
 
-```py
-# TODO: Add examples
+Then, create the graph by importing the `create_cua` function from the `langgraph_cua` module.
+
+```python
+from langgraph_cua import create_cua
+
+cua_graph = create_cua()
 ```
-
-## How to add memory
-
-TODO: Add how to add memory section
 
 ## How to customize
 

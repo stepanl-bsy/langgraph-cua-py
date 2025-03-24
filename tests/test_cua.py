@@ -27,10 +27,16 @@ async def test_browser_interaction():
                 "is already initialized, and visiting google.com."
             )
         ),
+        # HumanMessage(
+        #     content=(
+        #         "I'm looking for a new camera. Help me find the best one. It should be 4k resolution, "
+        #         "by Cannon, and under $1000. I want a digital camera, and I'll be using it mainly for photography."
+        #     )
+        # ),
         HumanMessage(
             content=(
-                "I'm looking for a new camera. Help me find the best one. It should be 4k resolution, "
-                "by Cannon, and under $1000. I want a digital camera, and I'll be using it mainly for photography."
+                "I want to contribute to the LangGraph.js project. Please find the GitHub repository, and inspect the read me, "
+                "along with some of the issues and open pull requests. Then, report back with a plan of action to contribute."
             )
         ),
     ]
@@ -41,7 +47,11 @@ async def test_browser_interaction():
     # Stream the graph execution
     stream = graph.astream(
         {"messages": messages},
-        {"streamMode": ["custom", "updates"], "configurable": {"zdr_enabled": zdr_enabled}},
+        {
+            "streamMode": ["custom", "updates"],
+            "configurable": {"zdr_enabled": zdr_enabled},
+            "recursion_limit": 100,
+        },
     )
 
     # Process the stream updates
