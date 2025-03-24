@@ -1,3 +1,5 @@
+from typing import Literal
+
 from langgraph.graph import END, START, StateGraph
 
 from langgraph_cua.nodes import call_model, create_vm_instance, take_computer_action

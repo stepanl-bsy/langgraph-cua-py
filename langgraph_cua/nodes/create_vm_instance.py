@@ -28,7 +28,6 @@ def create_vm_instance(state: CUAState, config: RunnableConfig):
         # If the instance_id already exists in state, do nothing.
         return {}
 
-
     if not scrapybara_api_key:
         raise ValueError(
             "Scrapybara API key not provided. Please provide one in the configurable fields, "

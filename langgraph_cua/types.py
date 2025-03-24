@@ -49,7 +49,7 @@ class CUAState(TypedDict):
     Attributes:
         messages: The messages between the user and assistant.
         instance_id: The ID of the instance to use for this thread.
-        
+
         stream_url: The URL to the live-stream of the virtual machine.
         authenticated_id: The ID of the auth state currently in use.
     """
@@ -81,7 +81,9 @@ class CUAConfiguration(TypedDict):
     timeout_hours: Optional[float]  # Timeout in hours (0.01-24, default: 1)
     zdr_enabled: Optional[bool]  # True/False for whether or not ZDR is enabled.
     auth_state_id: Optional[str]  # The ID of the authentication state.
-    environment: Optional[Literal["web", "ubuntu", "windows"]]  # The environment to use. Default is "web".
+    environment: Optional[
+        Literal["web", "ubuntu", "windows"]
+    ]  # The environment to use. Default is "web".
 
 
 def get_configuration_with_defaults(config: RunnableConfig) -> Dict[str, Any]:

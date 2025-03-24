@@ -51,11 +51,7 @@ async def call_model(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
     last_message = messages[-1] if messages else None
 
     # Check if the last message is a tool message
-    if (
-        last_message
-        and getattr(last_message, "type", None) == "tool"
-        and zdr_enabled is False
-    ):
+    if last_message and getattr(last_message, "type", None) == "tool" and zdr_enabled is False:
         # If it's a tool message, check if the second-to-last message is an AI message
         if (
             len(messages) >= 2
@@ -80,11 +76,7 @@ async def call_model(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
     response: AIMessageChunk
 
     # Check if the last message is a tool message
-    if (
-        last_message
-        and getattr(last_message, "type", None) == "tool"
-        and zdr_enabled is False
-    ):
+    if last_message and getattr(last_message, "type", None) == "tool" and zdr_enabled is False:
         if previous_response_id is None:
             raise ValueError("Cannot process tool message without a previous_response_id")
 
