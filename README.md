@@ -75,6 +75,10 @@ async for update in stream:
 print("Done")
 ```
 
+The above example will invoke the graph, passing in a request for it to do some research into LangGraph.js from the standpoint of a new contributor. The code will log the stream URL, which you can open in your browser to view the CUA stream.
+
+You can find more examples inside the [`examples` directory](./examples/).
+
 ## How to customize
 
 The `create_cua` function accepts a few configuration parameters. These are the same configuration parameters that the graph accepts, along with `recursion_limit`.
