@@ -26,7 +26,9 @@ def get_scrapybara_client(api_key: str) -> Scrapybara:
     return client
 
 
-def get_instance(id: str, config: RunnableConfig) -> Union[UbuntuInstance, BrowserInstance, WindowsInstance]:
+def get_instance(
+    id: str, config: RunnableConfig
+) -> Union[UbuntuInstance, BrowserInstance, WindowsInstance]:
     """
     Gets an instance by its ID from Scrapybara.
 

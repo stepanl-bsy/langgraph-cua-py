@@ -1,7 +1,8 @@
-from scrapybara.client import UbuntuInstance, BrowserInstance, WindowsInstance
+from langchain_core.runnables.config import RunnableConfig
+from scrapybara.client import BrowserInstance, UbuntuInstance, WindowsInstance
+
 from ..types import CUAState
 from ..utils import get_configuration_with_defaults, get_scrapybara_client
-from langchain_core.runnables.config import RunnableConfig
 
 # Copied from the OpenAI example repository
 # https://github.com/openai/openai-cua-sample-app/blob/eb2d58ba77ffd3206d3346d6357093647d29d99c/utils.py#L13
@@ -45,7 +46,9 @@ def create_vm_instance(state: CUAState, config: RunnableConfig):
         blocked_domains = [
             domain.replace("https://", "").replace("www.", "") for domain in BLOCKED_DOMAINS
         ]
-        instance = client.start_browser(timeout_hours=timeout_hours, blocked_domains=blocked_domains)
+        instance = client.start_browser(
+            timeout_hours=timeout_hours, blocked_domains=blocked_domains
+        )
     else:
         raise ValueError(
             f"Invalid environment. Must be one of 'web', 'ubuntu', or 'windows'. Received: {environment}"
