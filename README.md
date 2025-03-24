@@ -2,6 +2,16 @@
 
 A Python library for creating computer use agent (CUA) systems using [LangGraph](https://github.com/langchain-ai/langgraph). A CUA is a type of agent which has the ability to interact with a computer to preform tasks.
 
+Short demo video:
+<video src="https://github.com/user-attachments/assets/7fd0ab05-fecc-46f5-961b-6624cb254ac2" controls></video>
+
+> [!TIP]
+> This demo used the following prompt:
+> ```
+> I want to contribute to the LangGraph.js project. Please find the GitHub repository, and inspect the read me,
+> along with some of the issues and open pull requests. Then, report back with a plan of action to contribute.
+> ```
+
 ## Features
 
 - **ADD FEATURES HERE**
