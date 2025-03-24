@@ -95,8 +95,8 @@ Next, set the required environment variables:
 cp .env.example .env
 ```
 
-Finally, you can then run the tests:
+Finally, you can then run the integration tests:
 
 ```bash
-pytest -xvs tests/test_cua.py
+pytest -xvs tests/integration/test_cua.py
 ```
