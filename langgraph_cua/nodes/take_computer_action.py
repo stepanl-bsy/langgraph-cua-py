@@ -68,10 +68,17 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
     auth_state_id = configuration.get("auth_state_id")
     authenticated_id = state.get("authenticated_id")
 
-    if environment == "web" and (
-        (authenticated_id is None and auth_state_id is not None)
-        or (authenticated_id is not None and authenticated_id != auth_state_id)
+    print(f"\n\n-----\nHELLO THERE\n\n{auth_state_id}")
+
+    if (
+        environment == "web"
+        and auth_state_id is not None
+        and (
+            (authenticated_id is None)
+            or (authenticated_id is not None and authenticated_id != auth_state_id)
+        )
     ):
+        print(f"\n\n-----\nAuthenticating with auth_state_id: {auth_state_id}")
         instance.authenticate(auth_state_id=auth_state_id)
         authenticated_id = auth_state_id
 
