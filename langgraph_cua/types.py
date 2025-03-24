@@ -67,7 +67,10 @@ class CUAConfiguration(TypedDict):
             This can be provided in the configuration, or set as an environment variable (SCRAPYBARA_API_KEY).
         timeout_hours: The number of hours to keep the virtual machine running before it times out.
             Must be between 0.01 and 24. Default is 1.
-        zdr_enabled: Whether or not Zero Data Retention is enabled in the user's OpenAI account. Default False.
+        zdr_enabled: Whether or not Zero Data Retention is enabled in the user's OpenAI account. If True,
+            the agent will not pass the 'previous_response_id' to the model, and will always pass it the full
+            message history for each request. If False, the agent will pass the 'previous_response_id' to the
+            model, and only the latest message in the history will be passed. Default False.
     """
 
     scrapybara_api_key: str  # API key for Scrapybara
