@@ -38,6 +38,12 @@ Then, create the graph by importing the `create_cua` function from the `langgrap
 
 ```python
 from langgraph_cua import create_cua
+from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage, SystemMessage
+
+# Load environment variables from .env file
+load_dotenv()
+
 
 cua_graph = create_cua()
 
@@ -57,22 +63,26 @@ messages = [
     ),
 ]
 
-# Stream the graph execution
-stream = cua_graph.astream(
-    {"messages": messages},
-    {"streamMode": "updates"}
-)
+async def main():
+    # Stream the graph execution
+    stream = cua_graph.astream(
+        {"messages": messages},
+        {"streamMode": "updates"}
+    )
 
-# Process the stream updates
-async for update in stream:
-    if "create_vm_instance" in update:
-        print("VM instance created")
-        stream_url = update.get("create_vm_instance", {}).get("stream_url")
-        # Open this URL in your browser to view the CUA stream
-        print(f"Stream URL: {stream_url}")
+    # Process the stream updates
+    async for update in stream:
+        if "create_vm_instance" in update:
+            print("VM instance created")
+            stream_url = update.get("create_vm_instance", {}).get("stream_url")
+            # Open this URL in your browser to view the CUA stream
+            print(f"Stream URL: {stream_url}")
 
+    print("Done")
 
-print("Done")
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
 ```
 
 The above example will invoke the graph, passing in a request for it to do some research into LangGraph.js from the standpoint of a new contributor. The code will log the stream URL, which you can open in your browser to view the CUA stream.
