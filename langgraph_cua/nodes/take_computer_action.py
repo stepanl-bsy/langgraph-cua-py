@@ -8,7 +8,7 @@ from openai.types.responses.response_computer_tool_call import ResponseComputerT
 from scrapybara.types import ComputerResponse, InstanceGetStreamUrlResponse
 
 from ..types import CUAState
-from ..utils import init_or_load, is_computer_tool_call
+from ..utils import get_instance, is_computer_tool_call
 
 # Copied from the OpenAI example repository
 # https://github.com/openai/openai-cua-sample-app/blob/eb2d58ba77ffd3206d3346d6357093647d29d99c/computers/scrapybara.py#L10
@@ -58,7 +58,10 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
     # Cast tool_outputs as list[ResponseComputerToolCall] since is_computer_tool_call is true
     tool_outputs: list[ResponseComputerToolCall] = tool_outputs
 
-    instance = init_or_load(state, config)
+    instance_id = state.get("instance_id")
+    if not instance_id:
+        raise ValueError("Instance ID not found in state.")
+    instance = get_instance(instance_id, config)
 
     stream_url: Optional[str] = state.get("stream_url")
     if not stream_url:

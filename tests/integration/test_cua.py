@@ -58,7 +58,12 @@ async def test_browser_interaction():
     async for update in stream:
         print("\n---UPDATE---\n")
 
-        if "take_computer_action" in update:
+        if "create_vm_instance" in update:
+            print("VM instance created")
+            stream_url = update.get("create_vm_instance", {}).get("stream_url")
+            # Open this URL in your browser to view the CUA stream
+            print(f"Stream URL: {stream_url}")
+        elif "take_computer_action" in update:
             print("Computer Action:")
             # Check for tool message in the messages field
             tool_message = update.get("take_computer_action", {}).get("messages")
