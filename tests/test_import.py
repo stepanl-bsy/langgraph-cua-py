@@ -1,7 +1,3 @@
 def test_import() -> None:
     """Test that the code can be imported"""
-    from langgraph_cua import (  # noqa: F401
-        add_active_agent_router,
-        create_handoff_tool,
-        create_swarm,
-    )
+    from langgraph_cua import CUAState, create_cua, graph  # noqa: F401
