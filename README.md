@@ -63,6 +63,15 @@ You can either pass these parameters when calling `create_cua`, or at runtime wh
     greater than the standard default of 25 in LangGraph, because computer use agents are expected to
     take more iterations.
 
+## Auth States
+
+LangGraph CUA has support for utilizing Scrapybara's auth states API. Auth states allow you to save authentication made in a browser session, so that it can be loaded at a later time.
+For example, you can login with your Amazon account, save the auth state, then in a future session, load that auth state to prevent having to login to your account again.
+
+You can read more about auth states with Scrapybara [here](https://docs.scrapybara.com/auth-states).
+
+To use auth states, you must pass an `auth_state_id` to the graph's configurable fields (or when calling `create_cua`). This will then cause the graph to load the authenticated state. After loading the auth state, it will save that ID in the `authenticated_id` state field. In future runs, it will always preform a check before taking an action to ensure the auth state is using the latest. This means you can modify the ID in the configurable fields `auth_state_id` to a new ID, and if it does not match what is stored in the `authenticated_id` state field, it will reauthenticate.
+
 ## Development
 
 To get started with development, first clone the repository:

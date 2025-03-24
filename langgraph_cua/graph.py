@@ -1,9 +1,8 @@
-from langchain_core.runnables.config import RunnableConfig
 from langgraph.graph import END, START, StateGraph
 
-from langgraph_cua.nodes import authenticate, call_model, create_vm_instance, take_computer_action
+from langgraph_cua.nodes import call_model, create_vm_instance, take_computer_action
 from langgraph_cua.types import CUAState
-from langgraph_cua.utils import get_configuration_with_defaults, is_computer_tool_call
+from langgraph_cua.utils import is_computer_tool_call
 
 
 def take_action_or_end(state: CUAState):
@@ -34,7 +33,7 @@ def take_action_or_end(state: CUAState):
     return "take_computer_action"
 
 
-def route_after_calling_model(state: CUAState, config: RunnableConfig):
+def route_after_calling_model(state: CUAState):
     """
     Routes to the create_vm_instance node if no instance_id exists, otherwise
     routes to take_action_or_end.
@@ -45,18 +44,9 @@ def route_after_calling_model(state: CUAState, config: RunnableConfig):
     Returns:
         "create_vm_instance", "take_computer_action", or END depending on the state.
     """
-    configuration = get_configuration_with_defaults(config)
-    auth_state_id = configuration.get("auth_state_id")
-
     if not state.get("instance_id"):
         # If the instance_id is not defined, create a new instance.
         return "create_vm_instance"
-    elif (state.get("authenticated_id") is None and auth_state_id is not None) or (
-        state.get("authenticated_id") is not None and state.get("authenticated_id") != auth_state_id
-    ):
-        # If the authenticated_id is NOT defined, and the auth_state_id is defined, authenticate.
-        # Or, if the authenticated_id is defined, but does NOT match the auth_state_id, authenticate.
-        return "authenticate"
 
     return take_action_or_end(state)
 
@@ -84,12 +74,10 @@ workflow = StateGraph(CUAState)
 workflow.add_node("call_model", call_model)
 workflow.add_node("create_vm_instance", create_vm_instance)
 workflow.add_node("take_computer_action", take_computer_action)
-workflow.add_node("authenticate", authenticate)
 
 workflow.add_edge(START, "call_model")
 workflow.add_conditional_edges("call_model", route_after_calling_model)
-workflow.add_edge("create_vm_instance", "authenticate")
-workflow.add_edge("authenticate", "take_computer_action")
+workflow.add_edge("create_vm_instance", "take_computer_action")
 workflow.add_conditional_edges("take_computer_action", reinvoke_model_or_end)
 
 graph = workflow.compile()
