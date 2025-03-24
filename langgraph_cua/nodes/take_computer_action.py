@@ -7,7 +7,7 @@ from langgraph.config import get_stream_writer
 from openai.types.responses.response_computer_tool_call import ResponseComputerToolCall
 from scrapybara.types import ComputerResponse, InstanceGetStreamUrlResponse
 
-from ..types import CUAState
+from ..types import CUAState, get_configuration_with_defaults
 from ..utils import get_instance, is_computer_tool_call
 
 # Copied from the OpenAI example repository
@@ -62,6 +62,25 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
     if not instance_id:
         raise ValueError("Instance ID not found in state.")
     instance = get_instance(instance_id, config)
+
+    configuration = get_configuration_with_defaults(config)
+    environment = configuration.get("environment")
+    auth_state_id = configuration.get("auth_state_id")
+    authenticated_id = state.get("authenticated_id")
+
+    print(f"\n\n-----\nHELLO THERE\n\n{auth_state_id}")
+
+    if (
+        environment == "web"
+        and auth_state_id is not None
+        and (
+            (authenticated_id is None)
+            or (authenticated_id is not None and authenticated_id != auth_state_id)
+        )
+    ):
+        print(f"\n\n-----\nAuthenticating with auth_state_id: {auth_state_id}")
+        instance.authenticate(auth_state_id=auth_state_id)
+        authenticated_id = auth_state_id
 
     stream_url: Optional[str] = state.get("stream_url")
     if not stream_url:
@@ -146,4 +165,5 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
         "messages": tool_message if tool_message else None,
         "instance_id": instance.id,
         "stream_url": stream_url,
+        "authenticated_id": authenticated_id,
     }

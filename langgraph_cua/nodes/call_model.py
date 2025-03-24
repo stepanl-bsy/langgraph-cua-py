@@ -1,6 +1,7 @@
 from typing import Any, Dict, Optional
 
 from langchain_core.messages import AIMessageChunk
+from langchain_core.runnables.config import RunnableConfig
 from langchain_openai import ChatOpenAI
 
 from ..types import CUAState, get_configuration_with_defaults
@@ -32,7 +33,7 @@ DEFAULT_DISPLAY_WIDTH = 1024
 DEFAULT_DISPLAY_HEIGHT = 768
 
 
-async def call_model(state: CUAState) -> Dict[str, Any]:
+async def call_model(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
     """
     Invokes the computer preview model with the given messages.
 
@@ -42,17 +43,15 @@ async def call_model(state: CUAState) -> Dict[str, Any]:
     Returns:
         The updated state with the model's response.
     """
-    config = get_configuration_with_defaults(state)
+    configuration = get_configuration_with_defaults(config)
+    environment = configuration.get("environment")
+    zdr_enabled = configuration.get("zdr_enabled")
     messages = state.get("messages", [])
     previous_response_id: Optional[str] = None
     last_message = messages[-1] if messages else None
 
     # Check if the last message is a tool message
-    if (
-        last_message
-        and getattr(last_message, "type", None) == "tool"
-        and config["zdr_enabled"] is False
-    ):
+    if last_message and getattr(last_message, "type", None) == "tool" and zdr_enabled is False:
         # If it's a tool message, check if the second-to-last message is an AI message
         if (
             len(messages) >= 2
@@ -70,18 +69,14 @@ async def call_model(state: CUAState) -> Dict[str, Any]:
         "type": "computer_use_preview",
         "display_width": DEFAULT_DISPLAY_WIDTH,
         "display_height": DEFAULT_DISPLAY_HEIGHT,
-        "environment": get_openai_env_from_state_env(state.get("environment", "web")),
+        "environment": get_openai_env_from_state_env(environment),
     }
     llm_with_tools = llm.bind_tools([tool])
 
     response: AIMessageChunk
 
     # Check if the last message is a tool message
-    if (
-        last_message
-        and getattr(last_message, "type", None) == "tool"
-        and config["zdr_enabled"] is False
-    ):
+    if last_message and getattr(last_message, "type", None) == "tool" and zdr_enabled is False:
         if previous_response_id is None:
             raise ValueError("Cannot process tool message without a previous_response_id")
 
