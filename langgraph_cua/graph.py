@@ -1,6 +1,6 @@
 from langgraph.graph import END, START, StateGraph
 
-from langgraph_cua.nodes import call_model, take_computer_action
+from langgraph_cua.nodes import call_model, create_vm_instance, take_computer_action
 from langgraph_cua.types import CUAState
 from langgraph_cua.utils import is_computer_tool_call
 
@@ -33,6 +33,23 @@ def take_action_or_end(state: CUAState):
     return "take_computer_action"
 
 
+def route_after_calling_model(state: CUAState):
+    """
+    Routes to the create_vm_instance node if no instance_id exists, otherwise
+    routes to take_action_or_end.
+
+    Args:
+        state: The current state of the thread.
+
+    Returns:
+        "create_vm_instance", "take_computer_action", or END depending on the state.
+    """
+    if not state.get("instance_id"):
+        return "create_vm_instance"
+
+    return take_action_or_end(state)
+
+
 def reinvoke_model_or_end(state: CUAState):
     """
     Routes to the call_model node if the last message is a tool message,
@@ -54,10 +71,12 @@ def reinvoke_model_or_end(state: CUAState):
 workflow = StateGraph(CUAState)
 
 workflow.add_node("call_model", call_model)
+workflow.add_node("create_vm_instance", create_vm_instance)
 workflow.add_node("take_computer_action", take_computer_action)
 
 workflow.add_edge(START, "call_model")
-workflow.add_conditional_edges("call_model", take_action_or_end)
+workflow.add_conditional_edges("call_model", route_after_calling_model)
+workflow.add_edge("create_vm_instance", "take_computer_action")
 workflow.add_conditional_edges("take_computer_action", reinvoke_model_or_end)
 
 graph = workflow.compile()
