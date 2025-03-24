@@ -41,7 +41,7 @@ def process_input(state: PriceFinderState):
     model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
     model_with_tools = model.with_structured_output(RoutingToolSchema)
 
-    messages = [system_message, HumanMessage(content=state.messages[-1].content)]
+    messages = [system_message, HumanMessage(content=state.get("messages")[-1].content)]
 
     response = model_with_tools.invoke(messages)
     return {"route": response.route}
@@ -62,7 +62,7 @@ def respond(state: PriceFinderState):
     )
     human_message = HumanMessage(
         content="Here are all of the messages in the conversation:\n\n"
-        + format_messages(state.messages)
+        + format_messages(state.get("messages"))
     )
 
     model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
@@ -107,15 +107,11 @@ async def main():
     ]
 
     # Stream the graph execution
-    stream = graph.astream({"messages": messages}, {"streamMode": "updates"})
+    stream = graph.astream({"messages": messages}, subgraphs=True, stream_mode="updates")
     print("Stream started")
     # Process the stream updates
     async for update in stream:
-        if "create_vm_instance" in update:
-            print("VM instance created")
-            stream_url = update.get("create_vm_instance", {}).get("stream_url")
-            # Open this URL in your browser to view the CUA stream
-            print(f"Stream URL: {stream_url}")
+        print(f"\n----\nUPDATE: {update}\n----\n")
 
     print("Done")
 

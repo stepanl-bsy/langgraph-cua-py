@@ -67,7 +67,7 @@ async def main():
     # Stream the graph execution
     stream = cua_graph.astream(
         {"messages": messages},
-        {"streamMode": "updates"}
+        stream_mode="updates"
     )
 
     # Process the stream updates

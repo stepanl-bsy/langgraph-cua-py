@@ -47,8 +47,8 @@ async def test_browser_interaction():
     # Stream the graph execution
     stream = graph.astream(
         {"messages": messages},
-        {
-            "streamMode": ["custom", "updates"],
+        stream_mode="updates",
+        config={
             "configurable": {"zdr_enabled": zdr_enabled},
             "recursion_limit": 100,
         },
