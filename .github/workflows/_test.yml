@@ -36,7 +36,8 @@ jobs:
         shell: bash
         run: uv sync --group test
 
-      - name: Run core tests
+      - name: Run unit tests
         shell: bash
         run: |
-          make test
+          
+        

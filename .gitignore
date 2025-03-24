@@ -37,3 +37,6 @@ MANIFEST
 .mypy_cache/
 .dmypy.json
 dmypy.json
+.pdm-build/
+.pytest_cache/
+.ruff_cache/
