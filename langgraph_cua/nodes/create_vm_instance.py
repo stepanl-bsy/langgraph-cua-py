@@ -27,6 +27,7 @@ def create_vm_instance(state: CUAState, config: RunnableConfig):
     configuration = get_configuration_with_defaults(config)
     scrapybara_api_key = configuration.get("scrapybara_api_key")
     timeout_hours = configuration.get("timeout_hours")
+    auth_state_id = configuration.get("auth_state_id")
 
     if not scrapybara_api_key:
         raise ValueError(
@@ -49,6 +50,7 @@ def create_vm_instance(state: CUAState, config: RunnableConfig):
         instance = client.start_browser(
             timeout_hours=timeout_hours, blocked_domains=blocked_domains
         )
+        instance.authenticate(auth_state_id=auth_state_id)
     else:
         raise ValueError(
             f"Invalid environment. Must be one of 'web', 'ubuntu', or 'windows'. Received: {environment}"

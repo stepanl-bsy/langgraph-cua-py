@@ -51,12 +51,14 @@ class CUAState(TypedDict):
         instance_id: The ID of the instance to use for this thread.
         environment: The environment to use. Default is "web".
         stream_url: The URL to the live-stream of the virtual machine.
+        authenticated_id: The ID of the auth state currently in use.
     """
 
     messages: Annotated[list[AnyMessage], add_messages] = []
     instance_id: Annotated[Optional[str], None] = None
     environment: Annotated[Literal["web", "ubuntu", "windows"], "web"] = "web"
     stream_url: Annotated[Optional[str], None] = None
+    authenticated_id: Annotated[Optional[str], None] = None
 
 
 class CUAConfiguration(TypedDict):
@@ -71,11 +73,14 @@ class CUAConfiguration(TypedDict):
             the agent will not pass the 'previous_response_id' to the model, and will always pass it the full
             message history for each request. If False, the agent will pass the 'previous_response_id' to the
             model, and only the latest message in the history will be passed. Default False.
+        auth_state_id: The ID of the authentication state. If defined, it will be used to authenticate
+            with Scrapybara. Only applies if 'environment' is set to 'web'.
     """
 
-    scrapybara_api_key: str  # API key for Scrapybara
-    timeout_hours: float  # Timeout in hours (0.01-24, default: 1)
-    zdr_enabled: bool  # True/False for whether or not ZDR is enabled.
+    scrapybara_api_key: Optional[str]  # API key for Scrapybara
+    timeout_hours: Optional[float]  # Timeout in hours (0.01-24, default: 1)
+    zdr_enabled: Optional[bool]  # True/False for whether or not ZDR is enabled.
+    auth_state_id: Optional[str]  # The ID of the authentication state.
 
 
 def get_configuration_with_defaults(config: RunnableConfig) -> Dict[str, Any]:
@@ -97,9 +102,11 @@ def get_configuration_with_defaults(config: RunnableConfig) -> Dict[str, Any]:
     )
     timeout_hours = configurable_fields.get("timeout_hours", 1)
     zdr_enabled = configurable_fields.get("zdr_enabled", False)
+    auth_state_id = configurable_fields.get("auth_state_id", None)
 
     return {
         "scrapybara_api_key": scrapybara_api_key,
         "timeout_hours": timeout_hours,
         "zdr_enabled": zdr_enabled,
+        "auth_state_id": auth_state_id,
     }
