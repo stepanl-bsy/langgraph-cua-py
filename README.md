@@ -78,6 +78,7 @@ The graph stores this ID in the `authenticated_id` state field. If you change th
 ### Managing Auth States with Scrapybara SDK
 
 #### Save an Auth State
+
 ```python
 from scrapybara import Scrapybara
 
@@ -87,6 +88,7 @@ auth_state_id = instance.save_auth(name="example_site").auth_state_id
 ```
 
 #### Modify an Auth State
+
 ```python
 client = Scrapybara(api_key="<api_key>")
 instance = client.get("<instance_id>")
