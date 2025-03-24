@@ -68,6 +68,14 @@ You can read more about auth states with Scrapybara [here](https://docs.scrapyba
 
 To use auth states, you must pass an `auth_state_id` to the graph's configurable fields (or when calling `create_cua`). This will then cause the graph to load the authenticated state. After loading the auth state, it will save that ID in the `authenticated_id` state field. In future runs, it will always preform a check before taking an action to ensure the auth state is using the latest. This means you can modify the ID in the configurable fields `auth_state_id` to a new ID, and if it does not match what is stored in the `authenticated_id` state field, it will reauthenticate.
 
+```python
+from langgraph_cua import create_cua
+
+
+# Create the graph with an auth state ID
+cua_graph = create_cua(auth_state_id="<your_auth_state_id>")
+```
+
 ## Development
 
 To get started with development, first clone the repository:
