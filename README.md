@@ -52,16 +52,12 @@ You can either pass these parameters when calling `create_cua`, or at runtime wh
 
 ### Configuration Parameters
 
-- `scrapybara_api_key`: The API key to use for Scrapybara. If not provided, it defaults to reading the
-    `SCRAPYBARA_API_KEY` environment variable.
+- `scrapybara_api_key`: The API key to use for Scrapybara. If not provided, it defaults to reading the `SCRAPYBARA_API_KEY` environment variable.
 - `timeout_hours`: The number of hours to keep the virtual machine running before it times out.
-- `zdr_enabled`: Whether or not Zero Data Retention is enabled in the user's OpenAI account. If True,
-    the agent will not pass the 'previous_response_id' to the model, and will always pass it the full
-    message history for each request. If False, the agent will pass the 'previous_response_id' to the
-    model, and only the latest message in the history will be passed. Default False.
-- `recursion_limit`: The maximum number of recursive calls the agent can make. Default is 100. This is
-    greater than the standard default of 25 in LangGraph, because computer use agents are expected to
-    take more iterations.
+- `zdr_enabled`: Whether or not Zero Data Retention is enabled in the user's OpenAI account. If True, the agent will not pass the 'previous_response_id' to the model, and will always pass it the full message history for each request. If False, the agent will pass the 'previous_response_id' to the model, and only the latest message in the history will be passed. Default False.
+- `recursion_limit`: The maximum number of recursive calls the agent can make. Default is 100. This is greater than the standard default of 25 in LangGraph, because computer use agents are expected to take more iterations.
+- `auth_state_id`: The ID of the authentication state. If defined, it will be used to authenticate with Scrapybara. Only applies if 'environment' is set to 'web'.
+- `environment`: The environment to use. Default is "web".
 
 ## Auth States
 

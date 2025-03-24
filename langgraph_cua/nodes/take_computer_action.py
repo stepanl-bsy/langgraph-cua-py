@@ -63,9 +63,8 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
         raise ValueError("Instance ID not found in state.")
     instance = get_instance(instance_id, config)
 
-    environment = state.get("environment", "web")
-
     configuration = get_configuration_with_defaults(config)
+    environment = configuration.get("environment")
     auth_state_id = configuration.get("auth_state_id")
     authenticated_id = state.get("authenticated_id")
 

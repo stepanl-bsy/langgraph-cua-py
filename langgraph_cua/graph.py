@@ -91,6 +91,7 @@ def create_cua(
     zdr_enabled: bool = False,
     recursion_limit: int = 100,
     auth_state_id: str = None,
+    environment: Literal["web", "ubuntu", "windows"] = "web",
 ):
     """Configuration for the Computer Use Agent.
 
@@ -106,6 +107,7 @@ def create_cua(
         recursion_limit: The maximum number of recursive calls the agent can make. Default is 100.
         auth_state_id: The ID of the authentication state. If defined, it will be used to authenticate
             with Scrapybara. Only applies if 'environment' is set to 'web'.
+        environment: The environment to use. Default is "web".
     """
     # Validate timeout_hours is within acceptable range
     if timeout_hours < 0.01 or timeout_hours > 24:
@@ -119,6 +121,7 @@ def create_cua(
                 "timeout_hours": timeout_hours,
                 "zdr_enabled": zdr_enabled,
                 "auth_state_id": auth_state_id,
+                "environment": environment,
             },
             "recursion_limit": recursion_limit,
         }
