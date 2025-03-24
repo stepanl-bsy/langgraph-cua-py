@@ -56,22 +56,30 @@ async def test_browser_interaction():
                 # Extract content from the tool message
                 content = tool_message.content
 
+                # Handle the case where content is an array
+                if isinstance(content, list) and len(content) > 0:
+                    # Use the first item in the array
+                    content_item = content[0]
+                else:
+                    # Use content directly if it's not an array
+                    content_item = content
+
                 # Try to parse content if it's a string
                 parsed_content = None
-                if isinstance(content, str):
+                if isinstance(content_item, str):
                     try:
                         # Try parsing as JSON first
-                        parsed_content = json.loads(content)
+                        parsed_content = json.loads(content_item)
                     except json.JSONDecodeError:
                         try:
                             # Try parsing as Python literal (for string representations of dicts)
-                            parsed_content = ast.literal_eval(content)
+                            parsed_content = ast.literal_eval(content_item)
                         except (SyntaxError, ValueError):
                             # If both fail, keep content as is
                             parsed_content = None
                 else:
                     # If content is already a dict, use it directly
-                    parsed_content = content if isinstance(content, dict) else None
+                    parsed_content = content_item if isinstance(content_item, dict) else None
 
                 # Handle image_url specially - truncate to 100 chars
                 if (
@@ -91,8 +99,8 @@ async def test_browser_interaction():
                     print(f"Image URL (truncated): {content_copy['image_url']}")
                 else:
                     # Just print the first 200 characters of the content if we couldn't parse it
-                    if isinstance(content, str) and len(content) > 200:
-                        print(f"Tool Message (truncated content): {content[:200]}...")
+                    if isinstance(content_item, str) and len(content_item) > 200:
+                        print(f"Tool Message (truncated content): {content_item[:200]}...")
                     else:
                         print(f"Tool Message: {tool_message}")
         elif "call_model" in update:

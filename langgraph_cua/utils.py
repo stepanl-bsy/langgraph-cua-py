@@ -6,6 +6,17 @@ from scrapybara.client import BrowserInstance, UbuntuInstance, WindowsInstance
 
 from .types import get_configuration_with_defaults
 
+# Copied from the OpenAI example repository
+# https://github.com/openai/openai-cua-sample-app/blob/eb2d58ba77ffd3206d3346d6357093647d29d99c/utils.py#L13
+BLOCKED_DOMAINS = [
+    "maliciousbook.com",
+    "evilvideos.com",
+    "darkwebforum.com",
+    "shadytok.com",
+    "suspiciouspins.com",
+    "ilanbigio.com",
+]
+
 
 def get_scrapybara_client(api_key: str) -> Scrapybara:
     """
@@ -63,7 +74,10 @@ def init_or_load(
     elif environment == "windows":
         return client.start_windows(timeout_hours=timeout_hours)
     elif environment == "web":
-        return client.start_browser(timeout_hours=timeout_hours)
+        blocked_domains = [
+            domain.replace("https://", "").replace("www.", "") for domain in BLOCKED_DOMAINS
+        ]
+        return client.start_browser(timeout_hours=timeout_hours, blocked_domains=blocked_domains)
 
     raise ValueError(
         f"Invalid environment. Must be one of 'web', 'ubuntu', or 'windows'. Received: {environment}"
