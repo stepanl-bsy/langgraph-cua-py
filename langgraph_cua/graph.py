@@ -90,6 +90,7 @@ def create_cua(
     timeout_hours: float = 1.0,
     zdr_enabled: bool = False,
     recursion_limit: int = 100,
+    auth_state_id: str = None,
 ):
     """Configuration for the Computer Use Agent.
 
@@ -103,6 +104,8 @@ def create_cua(
             message history for each request. If False, the agent will pass the 'previous_response_id' to the
             model, and only the latest message in the history will be passed. Default False.
         recursion_limit: The maximum number of recursive calls the agent can make. Default is 100.
+        auth_state_id: The ID of the authentication state. If defined, it will be used to authenticate
+            with Scrapybara. Only applies if 'environment' is set to 'web'.
     """
     # Validate timeout_hours is within acceptable range
     if timeout_hours < 0.01 or timeout_hours > 24:
@@ -115,6 +118,7 @@ def create_cua(
                 "scrapybara_api_key": scrapybara_api_key,
                 "timeout_hours": timeout_hours,
                 "zdr_enabled": zdr_enabled,
+                "auth_state_id": auth_state_id,
             },
             "recursion_limit": recursion_limit,
         }
