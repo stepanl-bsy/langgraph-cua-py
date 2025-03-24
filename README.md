@@ -61,20 +61,41 @@ You can either pass these parameters when calling `create_cua`, or at runtime wh
 
 ## Auth States
 
-LangGraph CUA has support for utilizing Scrapybara's auth states API. Auth states allow you to save authentication made in a browser session, so that it can be loaded at a later time.
-For example, you can login with your Amazon account, save the auth state, then in a future session, load that auth state to prevent having to login to your account again.
+LangGraph CUA integrates with Scrapybara's [auth states API](https://docs.scrapybara.com/auth-states) to persist browser authentication sessions. This allows you to authenticate once (e.g., logging into Amazon) and reuse that session in future runs.
 
-You can read more about auth states with Scrapybara [here](https://docs.scrapybara.com/auth-states).
+### Using Auth States
 
-To use auth states, you must pass an `auth_state_id` to the graph's configurable fields (or when calling `create_cua`). This will then cause the graph to load the authenticated state. After loading the auth state, it will save that ID in the `authenticated_id` state field. In future runs, it will always preform a check before taking an action to ensure the auth state is using the latest. This means you can modify the ID in the configurable fields `auth_state_id` to a new ID, and if it does not match what is stored in the `authenticated_id` state field, it will reauthenticate.
+Pass an `auth_state_id` when creating your CUA graph:
 
 ```python
 from langgraph_cua import create_cua
 
-
-# Create the graph with an auth state ID
 cua_graph = create_cua(auth_state_id="<your_auth_state_id>")
 ```
+
+The graph stores this ID in the `authenticated_id` state field. If you change the `auth_state_id` in future runs, the graph will automatically reauthenticate.
+
+### Managing Auth States with Scrapybara SDK
+
+#### Save an Auth State
+```python
+from scrapybara import Scrapybara
+
+client = Scrapybara(api_key="<api_key>")
+instance = client.get("<instance_id>")
+auth_state_id = instance.save_auth(name="example_site").auth_state_id
+```
+
+#### Modify an Auth State
+```python
+client = Scrapybara(api_key="<api_key>")
+instance = client.get("<instance_id>")
+instance.modify_auth(auth_state_id="your_existing_auth_state_id", name="renamed_auth_state")
+```
+
+> [!NOTE]
+> To apply changes to an auth state in an existing run, set the `authenticated_id` state field to `None` to trigger re-authentication.
+
 
 ## Development
 
