@@ -1,3 +1,5 @@
+from typing import Literal
+
 from langgraph.graph import END, START, StateGraph
 
 from langgraph_cua.nodes import call_model, create_vm_instance, take_computer_action
@@ -45,6 +47,7 @@ def route_after_calling_model(state: CUAState):
         "create_vm_instance", "take_computer_action", or END depending on the state.
     """
     if not state.get("instance_id"):
+        # If the instance_id is not defined, create a new instance.
         return "create_vm_instance"
 
     return take_action_or_end(state)
@@ -89,6 +92,8 @@ def create_cua(
     timeout_hours: float = 1.0,
     zdr_enabled: bool = False,
     recursion_limit: int = 100,
+    auth_state_id: str = None,
+    environment: Literal["web", "ubuntu", "windows"] = "web",
 ):
     """Configuration for the Computer Use Agent.
 
@@ -102,6 +107,9 @@ def create_cua(
             message history for each request. If False, the agent will pass the 'previous_response_id' to the
             model, and only the latest message in the history will be passed. Default False.
         recursion_limit: The maximum number of recursive calls the agent can make. Default is 100.
+        auth_state_id: The ID of the authentication state. If defined, it will be used to authenticate
+            with Scrapybara. Only applies if 'environment' is set to 'web'.
+        environment: The environment to use. Default is "web".
     """
     # Validate timeout_hours is within acceptable range
     if timeout_hours < 0.01 or timeout_hours > 24:
@@ -114,6 +122,8 @@ def create_cua(
                 "scrapybara_api_key": scrapybara_api_key,
                 "timeout_hours": timeout_hours,
                 "zdr_enabled": zdr_enabled,
+                "auth_state_id": auth_state_id,
+                "environment": environment,
             },
             "recursion_limit": recursion_limit,
         }

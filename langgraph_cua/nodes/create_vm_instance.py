@@ -18,15 +18,14 @@ BLOCKED_DOMAINS = [
 
 def create_vm_instance(state: CUAState, config: RunnableConfig):
     instance_id = state.get("instance_id")
-    environment = state.get("environment", "web")
+    configuration = get_configuration_with_defaults(config)
+    scrapybara_api_key = configuration.get("scrapybara_api_key")
+    timeout_hours = configuration.get("timeout_hours")
+    environment = configuration.get("environment")
 
     if instance_id is not None:
         # If the instance_id already exists in state, do nothing.
         return {}
-
-    configuration = get_configuration_with_defaults(config)
-    scrapybara_api_key = configuration.get("scrapybara_api_key")
-    timeout_hours = configuration.get("timeout_hours")
 
     if not scrapybara_api_key:
         raise ValueError(
@@ -58,6 +57,5 @@ def create_vm_instance(state: CUAState, config: RunnableConfig):
 
     return {
         "instance_id": instance.id,
-        "environment": environment,
         "stream_url": stream_url,
     }
