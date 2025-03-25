@@ -32,9 +32,12 @@ def get_openai_env_from_state_env(env: str) -> str:
 DEFAULT_DISPLAY_WIDTH = 1024
 DEFAULT_DISPLAY_HEIGHT = 768
 
-def _prompt_to_sys_message(prompt: Union[str, SystemMessage]) -> SystemMessage:
+
+def _prompt_to_sys_message(prompt: Union[str, SystemMessage, None]):
+    if prompt is None:
+        return None
     if isinstance(prompt, str):
-        return SystemMessage(content=prompt)
+        return {"role": "system", "content": prompt}
     return prompt
 
 
@@ -51,6 +54,7 @@ async def call_model(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
     configuration = get_configuration_with_defaults(config)
     environment = configuration.get("environment")
     zdr_enabled = configuration.get("zdr_enabled")
+    prompt = _prompt_to_sys_message(configuration.get("prompt"))
     messages = state.get("messages", [])
     previous_response_id: Optional[str] = None
     last_message = messages[-1] if messages else None
@@ -80,8 +84,6 @@ async def call_model(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
 
     response: AIMessageChunk
 
-    system_message = _prompt_to_sys_message(state.get("prompt"))
-
     # Check if the last message is a tool message
     if last_message and getattr(last_message, "type", None) == "tool" and zdr_enabled is False:
         if previous_response_id is None:
@@ -91,7 +93,10 @@ async def call_model(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
         response = await llm_with_tools.ainvoke([last_message])
     else:
         # Pass all messages to the model
-        response = await llm_with_tools.ainvoke([system_message, *messages])
+        if prompt is None:
+            response = await llm_with_tools.ainvoke(messages)
+        else:
+            response = await llm_with_tools.ainvoke([prompt, *messages])
 
     return {
         "messages": response,

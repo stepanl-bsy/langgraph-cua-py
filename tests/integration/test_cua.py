@@ -3,7 +3,6 @@ import json
 
 import pytest
 from dotenv import load_dotenv
-from langchain_core.messages import HumanMessage, SystemMessage
 
 from langgraph_cua import create_cua
 
@@ -21,24 +20,27 @@ async def test_browser_interaction():
 
     # Create input messages similar to the TypeScript test
     messages = [
-        SystemMessage(
-            content=(
+        {
+            "role": "system",
+            "content": (
                 "You're an advanced AI computer use assistant. The browser you are using "
                 "is already initialized, and visiting google.com."
-            )
-        ),
-        # HumanMessage(
-        #     content=(
+            ),
+        },
+        # {
+        #     "role": "user",
+        #     "content": (
         #         "I'm looking for a new camera. Help me find the best one. It should be 4k resolution, "
         #         "by Cannon, and under $1000. I want a digital camera, and I'll be using it mainly for photography."
         #     )
-        # ),
-        HumanMessage(
-            content=(
+        # },
+        {
+            "role": "user",
+            "content": (
                 "I want to contribute to the LangGraph.js project. Please find the GitHub repository, and inspect the read me, "
                 "along with some of the issues and open pull requests. Then, report back with a plan of action to contribute."
-            )
-        ),
+            ),
+        },
     ]
 
     # Enable/disable different handling of messages based on whether or not ZDR is enabled

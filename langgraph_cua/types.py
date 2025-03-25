@@ -47,8 +47,6 @@ class CUAState(TypedDict):
     """State schema for the computer use agent.
 
     Attributes:
-        prompt: The initial prompt to use for the conversation. Will
-            be passed as a system message
         messages: The messages between the user and assistant.
         instance_id: The ID of the instance to use for this thread.
 
@@ -56,7 +54,6 @@ class CUAState(TypedDict):
         authenticated_id: The ID of the auth state currently in use.
     """
 
-    prompt: Annotated[Union[str, SystemMessage], None] = None
     messages: Annotated[list[AnyMessage], add_messages] = []
     instance_id: Annotated[Optional[str], None] = None
     stream_url: Annotated[Optional[str], None] = None
@@ -78,6 +75,8 @@ class CUAConfiguration(TypedDict):
         auth_state_id: The ID of the authentication state. If defined, it will be used to authenticate
             with Scrapybara. Only applies if 'environment' is set to 'web'.
         environment: The environment to use. Default is "web".
+        prompt: The initial prompt to use for the conversation. Will
+            be passed as a system message
     """
 
     scrapybara_api_key: Optional[str]  # API key for Scrapybara
@@ -87,6 +86,7 @@ class CUAConfiguration(TypedDict):
     environment: Optional[
         Literal["web", "ubuntu", "windows"]
     ]  # The environment to use. Default is "web".
+    prompt: Optional[Union[str, SystemMessage]]  # The initial prompt to use for the conversation
 
 
 def get_configuration_with_defaults(config: RunnableConfig) -> Dict[str, Any]:
@@ -110,6 +110,7 @@ def get_configuration_with_defaults(config: RunnableConfig) -> Dict[str, Any]:
     zdr_enabled = configurable_fields.get("zdr_enabled", False)
     auth_state_id = configurable_fields.get("auth_state_id", None)
     environment = configurable_fields.get("environment", "web")
+    prompt = configurable_fields.get("prompt", None)
 
     return {
         "scrapybara_api_key": scrapybara_api_key,
@@ -117,4 +118,5 @@ def get_configuration_with_defaults(config: RunnableConfig) -> Dict[str, Any]:
         "zdr_enabled": zdr_enabled,
         "auth_state_id": auth_state_id,
         "environment": environment,
+        "prompt": prompt,
     }

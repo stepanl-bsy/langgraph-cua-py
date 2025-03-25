@@ -37,7 +37,6 @@ Then, create the graph by importing the `create_cua` function from the `langgrap
 ```python
 from langgraph_cua import create_cua
 from dotenv import load_dotenv
-from langchain_core.messages import HumanMessage, SystemMessage
 
 # Load environment variables from .env file
 load_dotenv()
@@ -47,18 +46,19 @@ cua_graph = create_cua()
 
 # Define the input messages
 messages = [
-    SystemMessage(
-        content=(
+    {
+        "role": "system",
+        "content": (
             "You're an advanced AI computer use assistant. The browser you are using "
             "is already initialized, and visiting google.com."
-        )
-    ),
-    HumanMessage(
-        content=(
-            "I want to contribute to the LangGraph.js project. Please find the GitHub repository, and inspect the read me, "
-            "along with some of the issues and open pull requests. Then, report back with a plan of action to contribute."
-        )
-    ),
+        ),
+    },
+    {
+        "role": "user",
+        "content": (
+            "Can you find the best price for new all season tires which will fit on my 2019 Subaru Forester?"
+        ),
+    },
 ]
 
 async def main():

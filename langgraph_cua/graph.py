@@ -1,5 +1,6 @@
-from typing import Literal
+from typing import Literal, Union
 
+from langchain_core.messages import SystemMessage
 from langgraph.graph import END, START, StateGraph
 
 from langgraph_cua.nodes import call_model, create_vm_instance, take_computer_action
@@ -80,6 +81,7 @@ def create_cua(
     recursion_limit: int = 100,
     auth_state_id: str = None,
     environment: Literal["web", "ubuntu", "windows"] = "web",
+    prompt: Union[str, SystemMessage] = None,
 ):
     """Configuration for the Computer Use Agent.
 
@@ -110,6 +112,7 @@ def create_cua(
                 "zdr_enabled": zdr_enabled,
                 "auth_state_id": auth_state_id,
                 "environment": environment,
+                "prompt": prompt,
             },
             "recursion_limit": recursion_limit,
         }
@@ -118,4 +121,4 @@ def create_cua(
     return configured_graph
 
 
-__all__ = ["create_cua", graph]
+__all__ = ["create_cua", "graph"]
