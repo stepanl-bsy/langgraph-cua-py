@@ -142,6 +142,10 @@ instance.modify_auth(auth_state_id="your_existing_auth_state_id", name="renamed_
 > To apply changes to an auth state in an existing run, set the `authenticated_id` state field to `None` to trigger re-authentication.
 
 
+## Zero Data Retention (ZDR)
+
+LangGraph CUA supports Zero Data Retention (ZDR) via the `zdr_enabled` configuration parameter. When set to true, the graph will _not_ assume it can use the `previous_message_id`, and _all_ AI & tool messages will be passed to the OpenAI on each request.
+
 ## Development
 
 To get started with development, first clone the repository:
