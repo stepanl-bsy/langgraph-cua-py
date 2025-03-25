@@ -4,7 +4,7 @@ build-backend = "pdm.backend"
 
 [project]
 name = "langgraph-cua"
-version = "0.0.0"
+version = "0.0.1"
 description = "An implementation of a computer use agent (CUA) using LangGraph"
 authors = [
     {name = "Brace Sproul", email = "46789226+bracesproul@users.noreply.github.com"}
