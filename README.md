@@ -20,7 +20,7 @@ This library is built on top of [LangGraph](https://github.com/langchain-ai/lang
 ## Installation
 
 ```bash
-pip install langgraph-cua langgraph langchain-core langchain-openai
+pip install langgraph-cua
 ```
 
 ## Quickstart
