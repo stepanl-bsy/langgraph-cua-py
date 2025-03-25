@@ -1,7 +1,7 @@
 import os
-from typing import Annotated, Any, Dict, List, Literal, Optional, TypedDict
+from typing import Annotated, Any, Dict, List, Literal, Optional, TypedDict, Union
 
-from langchain_core.messages import AnyMessage
+from langchain_core.messages import AnyMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import add_messages
 
@@ -47,6 +47,8 @@ class CUAState(TypedDict):
     """State schema for the computer use agent.
 
     Attributes:
+        prompt: The initial prompt to use for the conversation. Will
+            be passed as a system message
         messages: The messages between the user and assistant.
         instance_id: The ID of the instance to use for this thread.
 
@@ -54,6 +56,7 @@ class CUAState(TypedDict):
         authenticated_id: The ID of the auth state currently in use.
     """
 
+    prompt: Annotated[Union[str, SystemMessage], None] = None
     messages: Annotated[list[AnyMessage], add_messages] = []
     instance_id: Annotated[Optional[str], None] = None
     stream_url: Annotated[Optional[str], None] = None

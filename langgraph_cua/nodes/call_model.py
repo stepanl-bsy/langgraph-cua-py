@@ -1,6 +1,6 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
-from langchain_core.messages import AIMessageChunk
+from langchain_core.messages import AIMessageChunk, SystemMessage
 from langchain_core.runnables.config import RunnableConfig
 from langchain_openai import ChatOpenAI
 
@@ -31,6 +31,11 @@ def get_openai_env_from_state_env(env: str) -> str:
 # Scrapybara does not allow for configuring this. Must use a hardcoded value.
 DEFAULT_DISPLAY_WIDTH = 1024
 DEFAULT_DISPLAY_HEIGHT = 768
+
+def _prompt_to_sys_message(prompt: Union[str, SystemMessage]) -> SystemMessage:
+    if isinstance(prompt, str):
+        return SystemMessage(content=prompt)
+    return prompt
 
 
 async def call_model(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
@@ -75,6 +80,8 @@ async def call_model(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
 
     response: AIMessageChunk
 
+    system_message = _prompt_to_sys_message(state.get("prompt"))
+
     # Check if the last message is a tool message
     if last_message and getattr(last_message, "type", None) == "tool" and zdr_enabled is False:
         if previous_response_id is None:
@@ -84,7 +91,7 @@ async def call_model(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
         response = await llm_with_tools.ainvoke([last_message])
     else:
         # Pass all messages to the model
-        response = await llm_with_tools.ainvoke(messages)
+        response = await llm_with_tools.ainvoke([system_message, *messages])
 
     return {
         "messages": response,
