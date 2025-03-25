@@ -141,8 +141,10 @@ You have access to an Ubuntu VM with internet connectivity. You can install Ubun
 - If a user's request implies the need for external information, assume they want you to search for it and provide the answer directly.  
 
 ### Date Context  
-Today's date is Tuesday, March 25, 2025
+Today's date is {todays_date}
 ```
+
+If you choose to use this prompt, ensure you're populating the `{todays_date}` placeholder with the current date.
 </details>
 
 ## Auth States
