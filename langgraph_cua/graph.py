@@ -3,7 +3,7 @@ from typing import Literal
 from langgraph.graph import END, START, StateGraph
 
 from langgraph_cua.nodes import call_model, create_vm_instance, take_computer_action
-from langgraph_cua.types import CUAState
+from langgraph_cua.types import CUAConfiguration, CUAState
 from langgraph_cua.utils import is_computer_tool_call
 
 
@@ -57,7 +57,7 @@ def reinvoke_model_or_end(state: CUAState):
     return END
 
 
-workflow = StateGraph(CUAState)
+workflow = StateGraph(CUAState, CUAConfiguration)
 
 workflow.add_node("call_model", call_model)
 workflow.add_node("create_vm_instance", create_vm_instance)
