@@ -89,7 +89,8 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
         writer = get_stream_writer()
         writer({"stream_url": stream_url})
 
-    action = tool_outputs[0].get("action")
+    output = tool_outputs[-1]
+    action = output.get("action")
     tool_message: Optional[ToolMessage] = None
 
     try:
@@ -150,12 +151,12 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
             }
             tool_message = ToolMessage(
                 content=[output_content],
-                tool_call_id=tool_outputs[0].get("call_id"),
+                tool_call_id=output.get("call_id"),
                 additional_kwargs={"type": "computer_call_output"},
             )
     except Exception as e:
         print(f"\n\nFailed to execute computer call: {e}\n\n")
-        print(f"Computer call details: {tool_outputs[0]}\n\n")
+        print(f"Computer call details: {output}\n\n")
 
     return {
         "messages": tool_message if tool_message else None,
