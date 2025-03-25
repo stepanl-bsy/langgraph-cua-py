@@ -32,25 +32,11 @@ def take_action_or_end(state: CUAState):
     if not is_computer_tool_call(tool_outputs):
         return END
 
-    return "take_computer_action"
-
-
-def route_after_calling_model(state: CUAState):
-    """
-    Routes to the create_vm_instance node if no instance_id exists, otherwise
-    routes to take_action_or_end.
-
-    Args:
-        state: The current state of the thread.
-
-    Returns:
-        "create_vm_instance", "take_computer_action", or END depending on the state.
-    """
     if not state.get("instance_id"):
         # If the instance_id is not defined, create a new instance.
         return "create_vm_instance"
 
-    return take_action_or_end(state)
+    return "take_computer_action"
 
 
 def reinvoke_model_or_end(state: CUAState):
@@ -78,7 +64,7 @@ workflow.add_node("create_vm_instance", create_vm_instance)
 workflow.add_node("take_computer_action", take_computer_action)
 
 workflow.add_edge(START, "call_model")
-workflow.add_conditional_edges("call_model", route_after_calling_model)
+workflow.add_conditional_edges("call_model", take_action_or_end)
 workflow.add_edge("create_vm_instance", "take_computer_action")
 workflow.add_conditional_edges("take_computer_action", reinvoke_model_or_end)
 

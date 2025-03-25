@@ -15,10 +15,6 @@ Short demo video:
 > along with some of the issues and open pull requests. Then, report back with a plan of action to contribute.
 > ```
 
-## Features
-
-- **ADD FEATURES HERE**
-
 This library is built on top of [LangGraph](https://github.com/langchain-ai/langgraph), a powerful framework for building agent applications, and comes with out-of-box support for [streaming](https://langchain-ai.github.io/langgraph/how-tos/#streaming), [short-term and long-term memory](https://langchain-ai.github.io/langgraph/concepts/memory/) and [human-in-the-loop](https://langchain-ai.github.io/langgraph/concepts/human_in_the_loop/).
 
 ## Installation
@@ -40,9 +36,56 @@ Then, create the graph by importing the `create_cua` function from the `langgrap
 
 ```python
 from langgraph_cua import create_cua
+from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage, SystemMessage
+
+# Load environment variables from .env file
+load_dotenv()
+
 
 cua_graph = create_cua()
+
+# Define the input messages
+messages = [
+    SystemMessage(
+        content=(
+            "You're an advanced AI computer use assistant. The browser you are using "
+            "is already initialized, and visiting google.com."
+        )
+    ),
+    HumanMessage(
+        content=(
+            "I want to contribute to the LangGraph.js project. Please find the GitHub repository, and inspect the read me, "
+            "along with some of the issues and open pull requests. Then, report back with a plan of action to contribute."
+        )
+    ),
+]
+
+async def main():
+    # Stream the graph execution
+    stream = cua_graph.astream(
+        {"messages": messages},
+        stream_mode="updates"
+    )
+
+    # Process the stream updates
+    async for update in stream:
+        if "create_vm_instance" in update:
+            print("VM instance created")
+            stream_url = update.get("create_vm_instance", {}).get("stream_url")
+            # Open this URL in your browser to view the CUA stream
+            print(f"Stream URL: {stream_url}")
+
+    print("Done")
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
 ```
+
+The above example will invoke the graph, passing in a request for it to do some research into LangGraph.js from the standpoint of a new contributor. The code will log the stream URL, which you can open in your browser to view the CUA stream.
+
+You can find more examples inside the [`examples` directory](./examples/).
 
 ## How to customize
 
@@ -54,10 +97,10 @@ You can either pass these parameters when calling `create_cua`, or at runtime wh
 
 - `scrapybara_api_key`: The API key to use for Scrapybara. If not provided, it defaults to reading the `SCRAPYBARA_API_KEY` environment variable.
 - `timeout_hours`: The number of hours to keep the virtual machine running before it times out.
-- `zdr_enabled`: Whether or not Zero Data Retention is enabled in the user's OpenAI account. If True, the agent will not pass the 'previous_response_id' to the model, and will always pass it the full message history for each request. If False, the agent will pass the 'previous_response_id' to the model, and only the latest message in the history will be passed. Default False.
+- `zdr_enabled`: Whether or not Zero Data Retention is enabled in the user's OpenAI account. If `True`, the agent will not pass the `previous_response_id` to the model, and will always pass it the full message history for each request. If `False`, the agent will pass the `previous_response_id` to the model, and only the latest message in the history will be passed. Default `False`.
 - `recursion_limit`: The maximum number of recursive calls the agent can make. Default is 100. This is greater than the standard default of 25 in LangGraph, because computer use agents are expected to take more iterations.
 - `auth_state_id`: The ID of the authentication state. If defined, it will be used to authenticate with Scrapybara. Only applies if 'environment' is set to 'web'.
-- `environment`: The environment to use. Default is "web".
+- `environment`: The environment to use. Default is `web`. Options are `web`, `ubuntu`, and `windows`.
 
 ## Auth States
 

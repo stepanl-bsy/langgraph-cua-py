@@ -68,8 +68,6 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
     auth_state_id = configuration.get("auth_state_id")
     authenticated_id = state.get("authenticated_id")
 
-    print(f"\n\n-----\nHELLO THERE\n\n{auth_state_id}")
-
     if (
         environment == "web"
         and auth_state_id is not None
@@ -78,7 +76,6 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
             or (authenticated_id is not None and authenticated_id != auth_state_id)
         )
     ):
-        print(f"\n\n-----\nAuthenticating with auth_state_id: {auth_state_id}")
         instance.authenticate(auth_state_id=auth_state_id)
         authenticated_id = auth_state_id
 
@@ -91,7 +88,6 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
 
         writer = get_stream_writer()
         writer({"stream_url": stream_url})
-        print(f"\n\n\nStream URL: {stream_url}\n\n\n")
 
     action = tool_outputs[0].get("action")
     tool_message: Optional[ToolMessage] = None
