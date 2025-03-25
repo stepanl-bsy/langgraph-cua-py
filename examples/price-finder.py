@@ -1,3 +1,8 @@
+"""
+Price Finder: A LangGraph workflow that routes user requests to either a general response
+or a Computer Use Agent (CUA) for web-based price lookups.
+"""
+
 from typing import List, Literal
 
 from dotenv import load_dotenv
@@ -12,16 +17,27 @@ from langgraph_cua.types import CUAState
 # Load environment variables from .env file
 load_dotenv()
 
-
-# Create the CUA graph
+# Create the Computer Use Agent (CUA) graph
 cua_graph = create_cua()
 
 
 class PriceFinderState(CUAState):
+    """State class for the Price Finder workflow, extending the CUA state."""
+
     route: Literal["respond", "computer_use_agent"]
 
 
 def process_input(state: PriceFinderState):
+    """
+    Analyzes the user's latest message and determines whether to route to the
+    computer use agent or to generate a direct response.
+
+    Args:
+        state: Current workflow state containing message history
+
+    Returns:
+        Dict with routing decision
+    """
     system_message = SystemMessage(
         content=(
             "You're an advanced AI assistant tasked with routing the user's query to the appropriate node."
@@ -48,7 +64,18 @@ def process_input(state: PriceFinderState):
 
 
 def respond(state: PriceFinderState):
+    """
+    Generates a general response to the user based on the entire conversation history.
+
+    Args:
+        state: Current workflow state containing full message history
+
+    Returns:
+        Dict containing the generated response
+    """
+
     def format_messages(messages: List[AnyMessage]) -> str:
+        """Formats a list of messages into a single string with type and content."""
         return "\n".join([f"{message.type}: {message.content}" for message in messages])
 
     system_message = SystemMessage(
@@ -72,7 +99,15 @@ def respond(state: PriceFinderState):
 
 
 def route_after_processing_input(state: PriceFinderState):
-    # Route to computer use or respond based on input
+    """
+    Conditional router that returns the route determined by process_input.
+
+    Args:
+        state: Current workflow state with route decision
+
+    Returns:
+        String route name for the next node
+    """
     return state.get("route")
 
 
@@ -91,7 +126,8 @@ graph.name = "Price Finder"
 
 
 async def main():
-    # Define the input messages
+    """Run the Price Finder workflow with a sample tire price query."""
+    # Define the initial conversation messages
     messages = [
         SystemMessage(
             content=(
@@ -106,10 +142,11 @@ async def main():
         ),
     ]
 
-    # Stream the graph execution
+    # Stream the graph execution with updates visible
     stream = graph.astream({"messages": messages}, subgraphs=True, stream_mode="updates")
     print("Stream started")
-    # Process the stream updates
+
+    # Process and display the stream updates
     async for update in stream:
         print(f"\n----\nUPDATE: {update}\n----\n")
 
