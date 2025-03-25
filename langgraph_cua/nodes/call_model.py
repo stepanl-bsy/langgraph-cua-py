@@ -1,6 +1,6 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
-from langchain_core.messages import AIMessageChunk
+from langchain_core.messages import AIMessageChunk, SystemMessage
 from langchain_core.runnables.config import RunnableConfig
 from langchain_openai import ChatOpenAI
 
@@ -33,6 +33,14 @@ DEFAULT_DISPLAY_WIDTH = 1024
 DEFAULT_DISPLAY_HEIGHT = 768
 
 
+def _prompt_to_sys_message(prompt: Union[str, SystemMessage, None]):
+    if prompt is None:
+        return None
+    if isinstance(prompt, str):
+        return {"role": "system", "content": prompt}
+    return prompt
+
+
 async def call_model(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
     """
     Invokes the computer preview model with the given messages.
@@ -46,6 +54,7 @@ async def call_model(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
     configuration = get_configuration_with_defaults(config)
     environment = configuration.get("environment")
     zdr_enabled = configuration.get("zdr_enabled")
+    prompt = _prompt_to_sys_message(configuration.get("prompt"))
     messages = state.get("messages", [])
     previous_response_id: Optional[str] = None
     last_message = messages[-1] if messages else None
@@ -84,7 +93,10 @@ async def call_model(state: CUAState, config: RunnableConfig) -> Dict[str, Any]:
         response = await llm_with_tools.ainvoke([last_message])
     else:
         # Pass all messages to the model
-        response = await llm_with_tools.ainvoke(messages)
+        if prompt is None:
+            response = await llm_with_tools.ainvoke(messages)
+        else:
+            response = await llm_with_tools.ainvoke([prompt, *messages])
 
     return {
         "messages": response,

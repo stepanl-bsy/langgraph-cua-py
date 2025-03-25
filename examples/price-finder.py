@@ -6,7 +6,7 @@ or a Computer Use Agent (CUA) for web-based price lookups.
 from typing import List, Literal
 
 from dotenv import load_dotenv
-from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AnyMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
@@ -38,13 +38,14 @@ def process_input(state: PriceFinderState):
     Returns:
         Dict with routing decision
     """
-    system_message = SystemMessage(
-        content=(
+    system_message = {
+        "role": "system",
+        "content": (
             "You're an advanced AI assistant tasked with routing the user's query to the appropriate node."
             + "Your options are: computer use or respond. You should pick computer use if the user's request requires "
             + "using a computer (e.g. looking up a price on a website), and pick respond for ANY other inputs."
-        )
-    )
+        ),
+    }
 
     class RoutingToolSchema(BaseModel):
         """Route the user's request to the appropriate node."""
@@ -57,7 +58,7 @@ def process_input(state: PriceFinderState):
     model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
     model_with_tools = model.with_structured_output(RoutingToolSchema)
 
-    messages = [system_message, HumanMessage(content=state.get("messages")[-1].content)]
+    messages = [system_message, {"role": "user", "content": state.get("messages")[-1].content}]
 
     response = model_with_tools.invoke(messages)
     return {"route": response.route}
@@ -78,19 +79,21 @@ def respond(state: PriceFinderState):
         """Formats a list of messages into a single string with type and content."""
         return "\n".join([f"{message.type}: {message.content}" for message in messages])
 
-    system_message = SystemMessage(
-        content=(
+    system_message = {
+        "role": "system",
+        "content": (
             "You're an advanced AI assistant tasked with responding to the user's input."
             + "You're provided with the full conversation between the user, and the AI assistant. "
             + "This conversation may include messages from a computer use agent, along with "
             + "general user inputs and AI responses. \n\n"
             + "Given all of this, please RESPOND to the user. If there is nothing to respond to, you may return something like 'Let me know if you have any other questions.'"
-        )
-    )
-    human_message = HumanMessage(
-        content="Here are all of the messages in the conversation:\n\n"
-        + format_messages(state.get("messages"))
-    )
+        ),
+    }
+    human_message = {
+        "role": "user",
+        "content": "Here are all of the messages in the conversation:\n\n"
+        + format_messages(state.get("messages")),
+    }
 
     model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
@@ -129,17 +132,19 @@ async def main():
     """Run the Price Finder workflow with a sample tire price query."""
     # Define the initial conversation messages
     messages = [
-        SystemMessage(
-            content=(
+        {
+            "role": "system",
+            "content": (
                 "You're an advanced AI computer use assistant. The browser you are using "
                 "is already initialized, and visiting google.com."
-            )
-        ),
-        HumanMessage(
-            content=(
+            ),
+        },
+        {
+            "role": "user",
+            "content": (
                 "Can you find the best price for new all season tires which will fit on my 2019 Subaru Forester?"
-            )
-        ),
+            ),
+        },
     ]
 
     # Stream the graph execution with updates visible

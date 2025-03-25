@@ -149,11 +149,12 @@ def take_computer_action(state: CUAState, config: RunnableConfig) -> Dict[str, A
                 "type": "input_image",
                 "image_url": f"data:image/png;base64,{computer_response.base_64_image}",
             }
-            tool_message = ToolMessage(
-                content=[output_content],
-                tool_call_id=output.get("call_id"),
-                additional_kwargs={"type": "computer_call_output"},
-            )
+            tool_message = {
+                "role": "tool",
+                "content": [output_content],
+                "tool_call_id": output.get("call_id"),
+                "additional_kwargs": {"type": "computer_call_output"},
+            }
     except Exception as e:
         print(f"\n\nFailed to execute computer call: {e}\n\n")
         print(f"Computer call details: {output}\n\n")

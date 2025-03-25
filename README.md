@@ -37,7 +37,6 @@ Then, create the graph by importing the `create_cua` function from the `langgrap
 ```python
 from langgraph_cua import create_cua
 from dotenv import load_dotenv
-from langchain_core.messages import HumanMessage, SystemMessage
 
 # Load environment variables from .env file
 load_dotenv()
@@ -47,18 +46,19 @@ cua_graph = create_cua()
 
 # Define the input messages
 messages = [
-    SystemMessage(
-        content=(
+    {
+        "role": "system",
+        "content": (
             "You're an advanced AI computer use assistant. The browser you are using "
             "is already initialized, and visiting google.com."
-        )
-    ),
-    HumanMessage(
-        content=(
-            "I want to contribute to the LangGraph.js project. Please find the GitHub repository, and inspect the read me, "
-            "along with some of the issues and open pull requests. Then, report back with a plan of action to contribute."
-        )
-    ),
+        ),
+    },
+    {
+        "role": "user",
+        "content": (
+            "Can you find the best price for new all season tires which will fit on my 2019 Subaru Forester?"
+        ),
+    },
 ]
 
 async def main():
@@ -101,6 +101,51 @@ You can either pass these parameters when calling `create_cua`, or at runtime wh
 - `recursion_limit`: The maximum number of recursive calls the agent can make. Default is 100. This is greater than the standard default of 25 in LangGraph, because computer use agents are expected to take more iterations.
 - `auth_state_id`: The ID of the authentication state. If defined, it will be used to authenticate with Scrapybara. Only applies if 'environment' is set to 'web'.
 - `environment`: The environment to use. Default is `web`. Options are `web`, `ubuntu`, and `windows`.
+- `prompt`: The prompt to pass to the model. This will be passed as the system message.
+
+### System Prompts
+
+Including a system prompt with your CUA graph is recommended, and can save the agent time in its initial steps by providing context into its environment and objective. Below is the recommended system prompt from Scrapybara:
+
+<details><summary>System Prompt</summary>
+    
+    You have access to an Ubuntu VM with internet connectivity. You can install Ubuntu applications using the bash tool (prefer curl over wget).  
+
+    ### Handling HTML and Large Text Output  
+    - To read an HTML file, open it in Chromium using the address bar.  
+
+    ### Interacting with Web Pages and Forms  
+    - Zoom out or scroll to ensure all content is visible.  
+    - When interacting with input fields:  
+    - Clear the field first using `Ctrl+A` and `Delete`.  
+    - Take an extra screenshot after pressing "Enter" to confirm the input was submitted correctly.  
+    - Move the mouse to the next field after submission.  
+
+    ### Efficiency and Authentication  
+    - Computer function calls take time; optimize by stringing together related actions when possible.  
+    - You are allowed to take actions on authenticated sites on behalf of the user.  
+    - Assume the user has already authenticated if they request access to a site.  
+    - For logging into additional sites, ask the user to use Auth Contexts or the Interactive Desktop.  
+
+    ### Handling Black Screens  
+    - If the first screenshot shows a black screen:  
+    - Click the center of the screen.  
+    - Take another screenshot.  
+
+    ### Best Practices  
+    - If given a complex task, break it down into smaller steps and ask for details only when necessary.  
+    - Read web pages thoroughly by scrolling down until sufficient information is gathered.  
+    - Explain each action you take and why.  
+    - Avoid asking for confirmation on routine actions (e.g., pressing "Enter" after typing a URL). Seek clarification only for ambiguous or critical actions (e.g., deleting files or submitting sensitive information).  
+    - If a user's request implies the need for external information, assume they want you to search for it and provide the answer directly.  
+
+    ### Date Context  
+    Today's date is {todays_date}
+
+
+If you choose to use this prompt, ensure you're populating the `{todays_date}` placeholder with the current date.
+
+</details>
 
 ## Auth States
 
